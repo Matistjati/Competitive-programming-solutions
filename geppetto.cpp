@@ -18,41 +18,6 @@ using namespace std;
 
 #define rep(i, high) for (ll i = 0; i < high; i++)
 
-void difference(set<int> &a, set<int> &b, set<int> &result)
-{
-	set_difference(a.begin(), a.end(), b.begin(), b.end(), inserter(result, result.end()));
-}
-
-int num_ingredients(int n, map<int, set<int>> hated, vector<bool> &used)
-{
-	if (n == used.size())
-	{
-		return 1;
-	}
-
-	bool hatedAny = false;
-	for (const int& hate : hated[n])
-	{
-		if (used[hate])
-		{
-			hatedAny = true;
-		}
-	}
-
-	int sum = 0;
-
-	if (!hatedAny)
-	{
-		vector<bool> copy(used);
-		copy[n] = true;
-		sum += num_ingredients(n + 1, hated, copy);
-	}
-
-	sum += num_ingredients(n + 1, hated, used);
-
-	return sum;
-}
-
 int main()
 {
 	int n;
@@ -60,8 +25,7 @@ int main()
 	int m;
 	read(m);
 
-	map<int, set<int>> hated;
-	map<int, set<int>> ok;
+	vector<int> masks;
 
 	rep(i, m)
 	{
@@ -72,26 +36,27 @@ int main()
 		a--;
 		b--;
 
-		if (!hated.count(a))
-		{
-			hated[a] = set<int>();
-		}
-		if (!hated.count(b))
-		{
-			hated[b] = set<int>();
-		}
-
-		hated[a].insert(b);
-		hated[b].insert(a);
+		masks.push_back((1 << a) + (1 << b));
 	}
 
+	int tot = 0;
+	for (int i = 0; i < (1 << n); i++)
+	{
+		bool valid = true;
+		for (const int& mask : masks)
+		{
+			if ((mask & i) == mask)
+			{
+				valid = false;
+				break;
+			}
+		}
 
+		if (valid)
+		{
+			tot++;
+		}
+	}
 
-	int sum = 0;
-
-	vector<bool> used;
-	used.resize(n, false);
-
-	sum += num_ingredients(0, hated, used);
-	write(sum);
+	write(tot);
 }
