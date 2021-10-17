@@ -65,13 +65,13 @@ int main()
         readpush(string, area);
     }
 
-    p2 h1 = {-1,-1};
-    p2 h2 = {-1,-1};
+    p2 h1 = { -1,-1 };
+    p2 h2 = { -1,-1 };
     rep(i, n)
     {
         rep(j, n)
         {
-            if (area[i][j]=='H')
+            if (area[i][j] == 'H')
             {
                 if (h1.first == -1)
                 {
@@ -87,7 +87,7 @@ int main()
         }
     }
 
-    set<p2> visited;
+    vector<bool> visited(502*502);
 
     queue<p2> horseQueue;
     horseQueue.push(h1);
@@ -97,9 +97,9 @@ int main()
     {
         p2 curr = horseQueue.front();
         horseQueue.pop();
-        if (!setcontains(visited,curr))
+        if (!visited[curr.first*501+curr.second])
         {
-            visited.insert(curr);
+            visited[curr.first * 501 + curr.second] = true;
         }
         else
         {
@@ -126,25 +126,25 @@ int main()
 
     horseQueue.push(h2);
 
-    set<p2> prevVisited;
+    vector<bool> prevVisited(502 * 502);
 
     while (horseQueue.size())
     {
         p2 curr = horseQueue.front();
         horseQueue.pop();
-        if (setcontains(visited, curr))
+        if (visited[curr.first * 501 + curr.second])
         {
             write("JA");
             return 0;
         }
 
-        if (setcontains(prevVisited,curr))
+        if (prevVisited[curr.first * 500 + curr.second])
         {
             continue;
         }
         else
         {
-            prevVisited.insert(curr);
+            prevVisited[curr.first * 500 + curr.second] = true;
         }
 
         repe(move, moves)
