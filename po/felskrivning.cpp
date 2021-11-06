@@ -31,11 +31,16 @@ using namespace std;
 
 #define read(a) cin >> a
 #define write(a) cout << (a) << endl
+#ifdef _DEBUG
 #define deb __debugbreak();
+#else
+#define deb ;
+#endif
 
 #define readpush(type,a) {type temp; read(temp); a.push_back(temp);}
 #define readinsert(type,a) {type temp; read(temp); a.insert(temp);}
 #define setcontains(set, x) (set.find(x) != set.end())
+#define stringcontains(str, x) (str.find(x) != string::npos)
 #define all(a) begin(a),end(a)
 
 #define rep(i, high) for (ll i = 0; i < high; i++)
@@ -52,109 +57,73 @@ inline void fast()
     cin.tie(NULL); cout.tie(NULL);
 }
 
-template <typename Out>
-void split(const std::string& s, char delim, Out result) {
-    std::istringstream iss(s);
-    std::string item;
-    while (std::getline(iss, item, delim)) {
-        *result++ = item;
-    }
-}
-
-std::vector<std::string> split(const std::string& s, char delim) {
-    std::vector<std::string> elems;
-    split(s, delim, std::back_inserter(elems));
-    return elems;
-}
-
-string translate(map<string, vector<string>>& dictForward, map<string, vector<string>>& dictBack, string in)
+int ans(map<pair<set<string>, int>, int>& memo, string& s, string& mistake, set<string>& mistakesDone, int index)
 {
-
-    string prev = in;
-    string ans;
-    while (true)
+    pair<set<string>, int> state = { mistakesDone, index };
+    if (setcontains(memo, state))
     {
-        string n = dictBack[dictForward[prev][0]][0];
-
-        if (n == prev)
-        {
-            ans = prev;
-            break;
-        }
-        prev = n;
+        return memo[state];
+    }
+    if (index == s.size())
+    {
+        return 1;
     }
 
-    prev = in;
-    while (true)
-    {
-        string n = dictBack[dictForward[prev][0]][0];
-        dictBack[dictForward[prev][0]][0] = ans;
+    int ret = 0;
 
-        if (n == prev)
+    char c = s[index];
+
+    if (stringcontains(mistake, c))
+    {
+        string mistCopy = mistake;
+        mistCopy.erase(remove(all(mistCopy), c), mistCopy.end());
+        repe(mistakeMade, mistCopy)
         {
-            return ans;
+            string mist = string(1, c) + string(1, mistakeMade);
+            if (!setcontains(mistakesDone, mist))
+            {
+                set<string> copy(mistakesDone);
+                copy.insert(mist);
+
+
+                ret += ans(memo, s, mistake, copy, index + 1);
+            }
         }
-        prev = n;
     }
+
+    ret += ans(memo, s, mistake, mistakesDone, index + 1);
+    memo[state] = ret;
+
+    return ret;
 }
 
 int main()
 {
     fast();
 
+    string site;
+    read(site);
+
     int n;
     read(n);
-
-    map<string, vector<string>> dictForward;
-    map<string, vector<string>> dictBack;
-
+    vector<string> replacements;
     rep(i, n)
     {
-        string key;
-        string value;
-        read(key);
-        read(value);
+        string s;
+        read(s);
 
-        if (!setcontains(dictForward,key))
-        {
-            dictForward[key] = {};
-        }
-        if (!setcontains(dictBack,value))
-        {
-            dictBack[value] = {};
-        }
-
-        dictForward[key].push_back(value);
-        dictBack[value].push_back(key);
+        replacements.push_back(s);
     }
 
-    int m;
-    read(m);
-    vector<string> words;
-    rep(i, m)
+    set<string> mistakes;
+
+    int answer = 1;
+    repe(mistake, replacements)
     {
-        readpush(string, words);
+        map<pair<set<string>, int>, int> memo;
+        answer *= ans(memo, site, mistake, mistakes, 0);
     }
-
-    map<string, string> finalTranslation;
-
-    repe(word, words)
-    {
-
-        string finalWord;
-        if (setcontains(finalTranslation, word))
-        {
-            finalWord = finalTranslation[word];
-        }
-        else
-        {
-            finalWord = translate(dictForward, dictBack, word);
-            finalTranslation[word] = finalWord;
-        }
-        cout << finalWord << " ";
-
-    }
-
+    write(answer-1);
 
 
     return 0;
