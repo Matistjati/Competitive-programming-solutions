@@ -1,94 +1,103 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <algorithm>
-#include <cmath>
-#include <set>
-#include <string>
-#include <iterator>
-#include <queue>
+#include <bits/stdc++.h>
 
 using namespace std;
 
 #define ll long long
+#define vi vector<ll>
+#define vvi vector<vi>
+#define p2 pair<ll, ll>
+#define p3 vi
+#define p4 vi
+#define vp2 vector<p2>
+#define vp3 vector<p3>
+#define inf 2e9
+#define linf 1e17
+
 #define read(a) cin >> a
-#define write(a) cout << a << endl
-#define readpush(type,a) type temp; read(temp); a.push_back(temp)
-#define readinsert(type,a) type temp; read(temp); a.insert(temp)
+#define dread(type, a) type a; cin >> a
+#define dread2(type, a, b) dread(type, a); dread(type, b)
+#define write(a) cout << (a) << endl
+#ifdef _DEBUG
+#define deb __debugbreak();
+#else
+#define deb ;
+#endif
+
+#define readpush(type,a) {type temp; read(temp); a.push_back(temp);}
+#define readinsert(type,a) {type temp; read(temp); a.insert(temp);}
 #define setcontains(set, x) (set.find(x) != set.end())
-#define notsetcontains(set, x) set.find(x) == set.end()
+#define stringcontains(str, x) (str.find(x) != string::npos)
+#define all(a) begin(a),end(a)
 
 #define rep(i, high) for (ll i = 0; i < high; i++)
-#define repe(i, container) for (auto const& i : container)
-#define inf 1e9
+#define repe(i, container) for (auto& i : container)
+#define per(i, high) for (ll i = high; i >= 0; i--)
 
-bool answer(map<int, set<int>>& tree, int curr, int many, set<int>& ans, set<int>& visited, set<int>& nuts)
+#define ceildiv(x,y) ((x + y - 1) / y)
+#define fract(a) (a-floor(a))
+
+
+inline void fast()
 {
-    bool yes = false;
-    if (setcontains(nuts, curr))
+    ios::sync_with_stdio(false);
+    cin.tie(NULL); cout.tie(NULL);
+}
+
+int answer(vector<vector<int>>& tree, vector<bool>& visited, vector<bool>& nuts, int curr)
+{
+    if (visited[curr])
     {
-        nuts.erase(curr);
-        yes = true;
-        ans.insert(curr);
+        return 0;
+    }
+    else
+    {
+        visited[curr] = true;
     }
 
-
-    int minAns = 0;
+    int ret = 0;
 
     repe(branch, tree[curr])
     {
-        if (!setcontains(visited, branch))
-        {
-            visited.insert(branch);
-            if (answer(tree, branch, many + 1, ans, visited, nuts))
-            {
-                yes = true;
-                ans.insert(curr);
-            }
-        }
+        ret += answer(tree, visited, nuts, branch);
     }
 
-    return yes;
+    return ret + ((ret > 0) | nuts[curr]);
 }
+
 
 int main()
 {
+    fast();
+
+#if 0
+    ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
+#endif
+
 
     int n, k;
     read(n);
     read(k);
 
-    set<int> nuts;
-    map<int, set<int>> tree;
+    vector<bool> nuts(n+1);
+    vector<vector<int>> tree(n+1, vector<int>());
 
     rep(i, k)
     {
-        readinsert(int, nuts);
+        dread(int, p);
+        nuts[p] = true;
     }
 
-    rep(i, n-1)
+    rep(i, n - 1)
     {
-        int a;
-        int b;
-        read(a);
-        read(b);
-        if (!setcontains(tree, a))
-        {
-            tree[a] = set<int>();
-        }
-        tree[a].insert(b);
-        if (!setcontains(tree, b))
-        {
-            tree[b] = set<int>();
-        }
-        tree[b].insert(a);
+        dread2(int, a,b);
+        tree[a].push_back(b);
+        tree[b].push_back(a);
     }
 
-    set<int> visited;
-    visited.insert(1);
-    set<int> ans = set<int>();
-    (answer(tree, 1, 0, ans, visited, nuts));
-    write((ans.size()-1)*2);
+    vector<bool> visited(n+1);
 
+    write((answer(tree,visited,nuts,1)-1)*2);
+
+
+    return 0;
 }
