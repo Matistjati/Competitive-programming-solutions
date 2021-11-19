@@ -43,12 +43,21 @@ inline void fast()
     cin.tie(NULL); cout.tie(NULL);
 }
 
-inline double coldist(tuple<int, int, int> a, tuple<int, int, int> b)
+inline double coldist(vector<double>& sqrtlookup, tuple<int, int, int> a, tuple<int, int, int> b)
 {
     int d1 = get<0>(a) - get<0>(b);
     int d2 = get<1>(a) - get<1>(b);
     int d3 = get<2>(a) - get<2>(b);
-    return sqrt(d1 * d1 + d2 * d2 + d3 * d3);
+    int index = d1 * d1 + d2 * d2 + d3 * d3;
+    if (sqrtlookup[index] != -1)
+    {
+        return sqrtlookup[index];
+    }
+    else
+    {
+        sqrtlookup[index] = sqrt(index);
+        return sqrtlookup[index];
+    }
 }
 
 int main()
@@ -57,24 +66,24 @@ int main()
 
 #if 0
     //ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
-    ifstream cin("C:\\Users\\Matis\\Downloads\\pixel\\examples\\sample03.in");
+    ifstream cin("C:\\Users\\Matis\\Downloads\\pixel\\examples\\sample01.in");
 #endif
 
     dread(int, n);
-    vector<tuple<int, int, int>> cols;
+    vector<tuple<int, int, int>> cols(n * 3);
     rep(i, n * 3)
     {
         dread(int, r);
         dread(int, g);
         dread(int, b);
-        cols.push_back({ r,g,b });
+        cols[i] = { r,g,b };
     }
 
+    vector<double> sqrtlookup(256 * 256 * 3, -1);
 
-    int i = 0;
     vector<pair<double, int>> scores;
 
-    for (int guessWidth = 20; guessWidth < 1000; guessWidth++)
+    for (int guessWidth = 20; guessWidth < 700; guessWidth++)
     {
 
         double score = 0;
@@ -87,7 +96,7 @@ int main()
             }
             rep(k, guessWidth)
             {
-                score += coldist(cols[guessWidth * j + k], cols[(guessWidth * (j + 1)) + k]);
+                score += coldist(sqrtlookup, cols[guessWidth * j + k], cols[(guessWidth * (j + 1)) + k]);
             }
 
             j++;
