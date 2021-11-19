@@ -1,24 +1,10 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <algorithm>
-#include <cmath>
-#include <set>
-#include <unordered_set>
-#include <string>
-#include <iterator>
-#include <queue>
-#include <tuple>
-#include <numeric>
-#include <random>
-#include <time.h>
-#include <stack>
-#include <chrono>
-#include <unordered_map>
-#include <iomanip>
+#include <bits/stdc++.h>
 
 using namespace std;
+
+#pragma GCC target ("avx2")
+#pragma GCC optimization ("O3")
+#pragma GCC optimization ("unroll-loops")
 
 #define ll long long
 #define vi vector<ll>
@@ -26,16 +12,25 @@ using namespace std;
 #define p2 pair<ll, ll>
 #define p3 vi
 #define p4 vi
+#define vp2 vector<p2>
+#define vp3 vector<p3>
 #define inf 2e9
 #define linf 1e17
 
 #define read(a) cin >> a
+#define dread(type, a) type a; cin >> a
+#define dread2(type, a, b) dread(type, a); dread(type, b)
 #define write(a) cout << (a) << endl
+#ifdef _DEBUG
 #define deb __debugbreak();
+#else
+#define deb ;
+#endif
 
-#define readpush(type,a) type temp; read(temp); a.push_back(temp)
-#define readinsert(type,a) type temp; read(temp); a.insert(temp)
+#define readpush(type,a) {type temp; read(temp); a.push_back(temp);}
+#define readinsert(type,a) {type temp; read(temp); a.insert(temp);}
 #define setcontains(set, x) (set.find(x) != set.end())
+#define stringcontains(str, x) (str.find(x) != string::npos)
 #define all(a) begin(a),end(a)
 
 #define rep(i, high) for (ll i = 0; i < high; i++)
@@ -43,15 +38,14 @@ using namespace std;
 #define per(i, high) for (ll i = high; i >= 0; i--)
 
 #define ceildiv(x,y) ((x + y - 1) / y)
+#define fract(a) (a-floor(a))
 
 
 inline void fast()
 {
     ios::sync_with_stdio(false);
-    ios_base::sync_with_stdio(false);
     cin.tie(NULL); cout.tie(NULL);
 }
-
 
 
 template <typename Out>
@@ -87,15 +81,23 @@ struct Rule
     string port;
 };
 
+
 int main()
 {
     fast();
+
+#if 0
+    //ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
+    ifstream cin("C:\\Users\\Matis\\Downloads\\pixel\\examples\\sample01.in");
+#endif
+
+
 
     int n;
     read(n);
 
     map<string, ruletype> stringToRule = { {"accept",ruletype::accept},{"drop",ruletype::drop},{"log",ruletype::Log},{"port",ruletype::port},{"ip",ruletype::ip},{"limit",ruletype::limit} };
-    vector<pair<ruletype, vector<Rule>>> rules;
+    vector<pair<ruletype, vector<Rule>>> rules(n);
 
     rep(i, n)
     {
@@ -149,8 +151,8 @@ int main()
         readpush(string, requests);
     }
 
-    map<string, int> n_requests = {};
-    queue<string> requestLimit;
+    map<ll, int> n_requests = {};
+    queue<ll> requestLimit;
 
     rep(i, requests.size())
     {
@@ -159,11 +161,20 @@ int main()
         string requestIp = requestParts[0];
         string requestPort = requestParts[1];
 
-        n_requests[requestIp]++;
-        requestLimit.push(requestIp);
+        ll ipHash = 0;
+        for (int i = 0; i < requestIp.size();i++)
+        {
+            char c = requestIp[i];
+            if (c >= '0' && c <= '9')
+            {
+                ipHash += (c - '0') * pow(10, i);
+            }
+        }
+        n_requests[ipHash]++;
+        requestLimit.push(ipHash);
         if (requestLimit.size() > 1000)
         {
-            string ip = requestLimit.front();
+            ll ip = requestLimit.front();
             requestLimit.pop();
             n_requests[ip]--;
         }
@@ -193,7 +204,7 @@ int main()
                 }
                 else if (rule.type == ruletype::limit)
                 {
-                    if (n_requests[requestIp] < rule.limit)
+                    if (n_requests[ipHash] < rule.limit)
                     {
                         passing = false;
                         break;
@@ -229,6 +240,7 @@ int main()
 
     endRequest:;
     }
+
 
     return 0;
 }
