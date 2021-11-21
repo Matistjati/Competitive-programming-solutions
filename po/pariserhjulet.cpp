@@ -1,36 +1,36 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <algorithm>
-#include <cmath>
-#include <set>
-#include <unordered_set>
-#include <string>
-#include <iterator>
-#include <queue>
-#include <tuple>
-#include <numeric>
-#include <random>
-#include <time.h>
-#include <stack>
-#include <chrono>
-#include <unordered_map>
+#include <bits/stdc++.h>
 
 using namespace std;
 
+#pragma GCC target ("avx2")
+#pragma GCC optimization ("O3")
+#pragma GCC optimization ("unroll-loops")
+
 #define ll long long
-#define p2 pair<ll, ll>
-#define p3 tuple<ll, ll, ll>
 #define vi vector<ll>
-#define inf 1e9
+#define vvi vector<vi>
+#define p2 pair<ll, ll>
+#define p3 vi
+#define p4 vi
+#define vp2 vector<p2>
+#define vp3 vector<p3>
+#define inf 2e9
+#define linf 1e17
 
 #define read(a) cin >> a
+#define dread(type, a) type a; cin >> a
+#define dread2(type, a, b) dread(type, a); dread(type, b)
 #define write(a) cout << (a) << endl
+#ifdef _DEBUG
+#define deb __debugbreak();
+#else
+#define deb ;
+#endif
 
-#define readpush(type,a) type temp; read(temp); a.push_back(temp)
-#define readinsert(type,a) type temp; read(temp); a.insert(temp)
+#define readpush(type,a) {type temp; read(temp); a.push_back(temp);}
+#define readinsert(type,a) {type temp; read(temp); a.insert(temp);}
 #define setcontains(set, x) (set.find(x) != set.end())
+#define stringcontains(str, x) (str.find(x) != string::npos)
 #define all(a) begin(a),end(a)
 
 #define rep(i, high) for (ll i = 0; i < high; i++)
@@ -38,65 +38,58 @@ using namespace std;
 #define per(i, high) for (ll i = high; i >= 0; i--)
 
 #define ceildiv(x,y) ((x + y - 1) / y)
+#define fract(a) (a-floor(a))
 
 
 inline void fast()
 {
     ios::sync_with_stdio(false);
-    ios_base::sync_with_stdio(false);
     cin.tie(NULL); cout.tie(NULL);
 }
+
 
 
 int main()
 {
     fast();
 
-
+#if 0
+    //ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
+    ifstream cin("C:\\Users\\Matis\\Downloads\\pixel\\examples\\sample01.in");
+#endif
 
     ll n;
     ll m;
     read(n);
     read(m);
 
-    queue<ll> teams;
+    std::vector<ll> container(m);
+    rep(i, m)
+    {
+        container[i] = i;
+    }
+
+    priority_queue<ll, vector<ll>, greater<ll>> wheel(greater<ll>(), move(container));
+
+    vector<ll> teams(n);
     rep(i, n)
     {
-        ll t;
-        read(t);
-        teams.push(t * m);
-    }
-    priority_queue<ll, vector<ll>, greater<ll>> wheel;
-
-
-    ll i = 0;
-
-    while (wheel.size() < m && teams.size())
-    {
-        wheel.push(teams.front() + i);
-        teams.pop();
-        i++;
+        read(teams[i]);
     }
 
-
-    while (true)
+    ll ans = -inf;
+    rep(i, n)
     {
-        i = wheel.top();
+        ll t = wheel.top();
         wheel.pop();
-        if (teams.size() == 0 && wheel.size() == 0)
-        {
-            break;
-        }
-
-        if (teams.size())
-        {
-            wheel.push(teams.front() + i);
-            teams.pop();
-        }
+        t += teams[i] * m;
+        ans = max(ans, t);
+        wheel.push(t);
     }
 
 
-    write(i);
 
-    return 0;
+    write(ans);
+
+    _Exit(0);
 }
