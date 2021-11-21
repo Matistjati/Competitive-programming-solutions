@@ -48,7 +48,6 @@ inline void fast()
 }
 
 
-
 int main()
 {
     fast();
@@ -57,6 +56,8 @@ int main()
     //ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
     ifstream cin("C:\\Users\\Matis\\Downloads\\pixel\\examples\\sample01.in");
 #endif
+
+
 
     dread(ll, n);
     vector<ll> queue(n);
@@ -73,33 +74,30 @@ int main()
         queue[i] = happiness;
     }
 
-
-
     ll ans = s;
 
     ll s2 = s;
-    for (ll i = zeroIndex + 1; i < queue.size(); i++)
+    for (int i = zeroIndex + 1; i < queue.size(); i++)
     {
+        // Optimized version
+        /*
+            Normally it would be
+            s2 -= v * (i + 1);
+            s2 += v * (i);
+        */
+        s2 -= queue[i];
         ans = max(ans, s2);
-        ll v = queue[i];
-        s2 -= v * (i + 1);
-        s2 += v * i;
     }
-    ans = max(ans, s2);
 
     s2 = s;
-    for (ll i = zeroIndex; i >= 0; i--)
+    for (int i = zeroIndex; i >= 0; i--)
     {
+        s2 += queue[i];
         ans = max(ans, s2);
-        ll v = queue[i];
-        s2 -= v * (i + 1);
-        s2 += v * (i + 2);
     }
-    ans = max(ans, s2);
-
-
 
     write(ans);
+
 
     _Exit(0);
 }
