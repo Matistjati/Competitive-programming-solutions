@@ -48,21 +48,7 @@ inline void fast()
     cin.tie(NULL); cout.tie(NULL);
 }
 
-inline bool possible(vector<vector<pair<ll,ll>>>& connections, double target)
-{
-    vector<double> best(connections.size(), -inf);
-    best[0] = 0;
 
-    rep(i, connections.size())
-    {
-        repe(con, connections[i])
-        {
-            best[con.first] = max(best[con.first], con.second+best[i]-target);
-        }
-    }
-
-    return best[connections.size()-1] > 0;
-}
 
 int main()
 {
@@ -72,6 +58,7 @@ int main()
     //ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
     ifstream cin("C:\\Users\\Matis\\Downloads\\pixel\\examples\\sample01.in");
 #endif
+
 
     dread2(ll, n, m);
     vector<vector<pair<ll, ll>>> connections(n);
@@ -84,12 +71,25 @@ int main()
     }
 
     double low = 0;
-    double high = linf;
+    double high = inf;
+    vector<double> best(connections.size(), -inf);
     rep(i, 100)
     {
         double mid = (low + high) / 2;
 
-        if (possible(connections, mid))
+
+        best[0] = 0;
+
+        rep(i, connections.size())
+        {
+
+            repe(con, connections[i])
+            {
+                best[con.first] = max(best[con.first], con.second + best[i] - mid);
+            }
+        }
+
+        if (best[connections.size()-1] > 0)
         {
             low = mid;
         }
@@ -97,15 +97,21 @@ int main()
         {
             high = mid;
         }
-        if (high-low<1e-7)
+
+        if (high - low < 1e-7)
         {
             break;
+        }
+        repe(con, best)
+        {
+            con = -inf;
         }
     }
 
 
     cout << fixed << setprecision(15) << low;
 
+
     return 0;
-    //_Exit(0);
+    _Exit(0);
 }
