@@ -59,14 +59,15 @@ int main()
 #endif
 
     dread2(int, n, m);
-    vector<ll> coins(n);
-    vector<ll> value(n);
+    vector<pair<ll,ll>> coins(n);
+
     rep(i, n)
     {
         dread(ll, amount);
-        coins[i] = amount;
-        value[i] = pow(2, i);
+        coins[i] = {pow(2,i),amount};
+
     }
+    reverse(all(coins));
 
     readvector(ll, toBuy, m);
     sort(all(toBuy));
@@ -74,19 +75,19 @@ int main()
 
     repe(cost, toBuy)
     {
-
-        per(i, n - 1)
+        for (auto it = coins.begin(); it != coins.end(); )
         {
-            ll c = cost / value[i];
-            if (c > coins[i])
+            ll c = cost / ((*it).first);
+            if (c > (*it).second)
             {
-                cost -= coins[i] * value[i];
-                coins[i] = 0;
+                cost -= (*it).second * (*it).first;
+                it = coins.erase(it);
             }
             else
             {
-                coins[i] -= c;
-                cost -= c * value[i];
+                (* it).second -= c;
+                cost -= c * (*it).first;
+                ++it;
             }
         }
         if (cost > 0)
