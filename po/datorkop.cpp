@@ -57,7 +57,7 @@ int possible(vector<pair<ll, pair<int, int>>>& sums, int index, int x, int y, in
     int bought = 0;
     while (x > 0 || y > 0)
     {
-        bool hashBought = false;
+        bool hasBought = false;
         for (int i = index; i < sums.size(); i++)
         {
             if (x - sums[i].second.first >= 0 && y - sums[i].second.second >= 0)
@@ -70,7 +70,7 @@ int possible(vector<pair<ll, pair<int, int>>>& sums, int index, int x, int y, in
                 break;
             }
         }
-        if (!hashBought)
+        if (!hasBought)
         {
             break;
         }
