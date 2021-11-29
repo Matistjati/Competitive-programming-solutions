@@ -55,12 +55,12 @@ inline void fast()
 int possible(vector<pair<ll, pair<int, int>>>& sums, int index, int x, int y, int n)
 {
     int bought = 0;
-    while (x>0||y>0)
+    while (x > 0 || y > 0)
     {
         bool hashBought = false;
         for (int i = index; i < sums.size(); i++)
         {
-            if (x-sums[i].second.first>=0&&y-sums[i].second.second>=0)
+            if (x - sums[i].second.first >= 0 && y - sums[i].second.second >= 0)
             {
                 bought++;
                 index = i;
@@ -90,7 +90,7 @@ int main()
     dread5(int, x, a, y, b, n);
     int bestV = -inf;
     vector<pair<ll, pair<int, int>>> sums;
-    for (int i = 0; i < x+1;i++)
+    for (int i = 0; i < x + 1; i++)
     {
         for (int j = 0; j < y + 1; j++)
         {
@@ -114,7 +114,6 @@ int main()
         {
             low = index;
             highestPossible = index;
-            break;
         }
         else
         {
@@ -123,8 +122,7 @@ int main()
 
         if (low + 1 == high)
         {
-            cout << sums[(high + low) / 2].first << endl;
-            _Exit(0);
+            break;
         }
 
     }
@@ -140,7 +138,7 @@ int main()
         {
             auto End = std::chrono::high_resolution_clock::now();
             std::chrono::duration<double, std::milli> Elapsed = End - Start;
-            if (Elapsed.count() >= 6500)
+            if (Elapsed.count() >= 200)
                 break;
         }
     }
