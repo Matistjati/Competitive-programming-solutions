@@ -1,89 +1,104 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <algorithm>
-#include <cmath>
-#include <set>
-#include <unordered_set>
-#include <string>
-#include <iterator>
-#include <queue>
-#include <tuple>
-#include <numeric>
-#include <random>
-#include <time.h>
-
+#include <bits/stdc++.h>
 
 using namespace std;
 
+#pragma GCC target ("avx2")
+#pragma GCC optimization ("O3")
+#pragma GCC optimization ("unroll-loops")
+
 #define ll long long
-#define p2 pair<ll, ll>
-#define p3 tuple<ll, ll, ll>
 #define vi vector<ll>
-#define inf 1e9
+#define vvi vector<vi>
+#define p2 pair<int, int>
+#define p3 tuple<ll,ll,ll>
+#define p4 vi
+#define ip3 tuple<int,int,int>
+#define ip4 tuple<int,int,int,int>
+#define vp2 vector<p2>
+#define vp3 vector<p3>
+#define inf 2e9
+#define linf 1e17
 
 #define read(a) cin >> a
-#define write(a) cout << (a) << endl
-
-#define readpush(type,a) type temp; read(temp); a.push_back(temp)
-#define readinsert(type,a) type temp; read(temp); a.insert(temp)
-#define setcontains(set, x) (set.find(x) != set.end())
+#define write(a) cout << (a) << "\n"
+#define dread(type, a) type a; cin >> a
+#define dread2(type, a, b) dread(type, a); dread(type, b)
+#define dread3(type, a, b, c) dread2(type, a, b); dread(type, c)
+#define dread4(type, a, b, c, d) dread3(type, a, b, c); dread(type, d)
+#define dread5(type, a, b, c, d, e) dread4(type, a, b, c, d); dread(type, e)
+#ifdef _DEBUG
+#define deb __debugbreak();
+#else
+#define deb ;
+#endif
 
 #define rep(i, high) for (ll i = 0; i < high; i++)
 #define repe(i, container) for (auto& i : container)
 #define per(i, high) for (ll i = high; i >= 0; i--)
 
-#define ceildiv(x,y) ((x + y - 1) / y)
+#define readpush(type,vect) type temp; read(temp); vect.push_back(temp);
+#define readvector(type, name, size) vector<type> name(size); rep(i,size) {dread(type,temp); name[i]=temp;}
+#define readinsert(type,a) {type temp; read(temp); a.insert(temp);}
+#define all(a) begin(a),end(a)
+#define setcontains(set, x) (set.find(x) != set.end())
+#define stringcontains(str, x) (str.find(x) != string::npos)
+#define within(a, b, c, d) (a >= 0 && a < b && c >= 0 && c < d)
 
+#define ceildiv(x,y) ((x + y - 1) / y)
+#define fract(a) (a-floor(a))
+#define sign(a) ((a>0) ? 1 : -1)
+
+auto Start = chrono::high_resolution_clock::now();
 
 inline void fast()
 {
     ios::sync_with_stdio(false);
-    ios_base::sync_with_stdio(false);
     cin.tie(NULL); cout.tie(NULL);
 }
+
 
 int main()
 {
     fast();
 
-    ll r;
-    ll c;
-    ll k;
+#if 0
+    ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
+#endif
+
+    int r;
+    int c;
+    int k;
     read(r);
     read(c);
     read(k);
 
-    vector<string> grid;
-    vector<vector<ll>> n_hits(r,vector<ll>(c,inf));
-
-    rep(i, r)
-    {
-        readpush(string, grid);
-    }
+    vector<string> grid(r);
+    vector<vector<int>> n_hits(r, vector<int>(c, inf));
 
     p2 start;
     p2 goal;
-    rep(row, r)
+    rep(i, r)
     {
-        rep(column, c)
+        dread(string, row);
+        grid[i] = row;
+        rep(j, row.size())
         {
-            if (grid[row][column] == 'S')
+            char c = row[j];
+            if (c == 'S')
             {
-                start = { row,column };
-                grid[row][column] = '.';
+                start = { i,j};
+                row[j] = '.';
             }
-            else if (grid[row][column] == 'G')
+            else if (c == 'G')
             {
-                goal = { row,column };
-                grid[row][column] = '.';
+                goal = { i,j };
+                row[j] = '.';
             }
         }
     }
 
     queue<p3> toCheck;
-    toCheck.push({start.first,start.second,0});
+    toCheck.push({ start.first,start.second,0 });
 
     vector<p2> directions = { {0,1},{0,-1},{1,0},{-1,0} };
     while (toCheck.size())
@@ -93,8 +108,8 @@ int main()
 
         if (get<0>(curr) == goal.first && get<1>(curr) == goal.second)
         {
-            write(get<2>(curr));
-            return 0;
+            cout << (get<2>(curr)) << endl;
+            _Exit(0);
         }
 
         repe(dir, directions)
@@ -117,12 +132,13 @@ int main()
 
                 n_hits[r1][c1] = n + 1;
 
-                toCheck.push({r1,c1,n+1});
+                toCheck.push({ r1,c1,n + 1 });
             }
         }
 
     }
 
 
-    return 0;
+    cout << endl;
+    _Exit(0);
 }
