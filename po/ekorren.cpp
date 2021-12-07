@@ -90,8 +90,8 @@ int main()
     rep(i, n - 1)
     {
         dread2(int, a,b);
-        tree[a].push_back(b);
-        tree[b].push_back(a);
+        tree[a].emplace_back(b);
+        tree[b].emplace_back(a);
     }
 
     vector<bool> visited(n+1);
