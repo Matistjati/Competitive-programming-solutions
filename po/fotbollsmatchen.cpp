@@ -63,22 +63,22 @@ double pr2;
 
 #define args tuple<int,int,int>
 
-double winprob(map<args,double>& memo, int n_a, int n_b, int target, bool left, double prob)
+double winprob(vector<vector<double>>& memo, int n_a, int n_b, int target, bool left, double prob)
 {
-    args state = { n_a,n_b,target };
-    if (setcontains(memo,state))
+    double& dp = memo[n_a][n_b];
+    if (dp!=-1)
     {
-        return memo[state];
+        return dp;
     }
-    if (n_a==n)
+    if (n_a == n)
     {
         return 1;
     }
-    else if (n_b==n)
+    else if (n_b == n)
     {
         return 0;
     }
-    if (n_a==target||n_b==target)
+    if (n_a == target || n_b == target)
     {
         target += 5;
         left = !left;
@@ -96,7 +96,7 @@ double winprob(map<args,double>& memo, int n_a, int n_b, int target, bool left, 
         ret += winprob(memo, n_a, n_b + 1, target, left, prob) * (1 - pr2);
     }
 
-    memo[state] = ret;
+    dp = ret;
 
     return ret;
 }
@@ -112,7 +112,7 @@ int main()
     cin >> n;
     read(pr1);
     read(pr2);
-    map<args, double> memo;
+    vector<vector<double>> memo(n+1, vector<double>(n+1,-1));
     cout << fixed << setprecision(15) << winprob(memo, 0, 0, 5, true, 1);
     cout << endl;
     _Exit(0);
