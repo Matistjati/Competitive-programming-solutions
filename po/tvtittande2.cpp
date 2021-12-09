@@ -10,7 +10,7 @@ using namespace std;
 #define vi vector<ll>
 #define vvi vector<vi>
 #define p2 pair<ll, ll>
-#define p3 vi
+#define p3 tuple<ll,ll,ll>
 #define p4 vi
 #define ip3 tuple<int,int,int>
 #define ip4 tuple<int,int,int,int>
@@ -33,6 +33,7 @@ using namespace std;
 #endif
 
 #define rep(i, high) for (ll i = 0; i < high; i++)
+#define repp(i, low, high) for (ll i = low; i < high; i++)
 #define repe(i, container) for (auto& i : container)
 #define per(i, high) for (ll i = high; i >= 0; i--)
 
@@ -69,9 +70,9 @@ int main()
     read(n);
     read(k);
 
-    vector<int> series(k+1);
+    vector<int> series(k + 1);
     series[0] = (inf);
-    for (int i = 1; i < k+1;i++)
+    for (int i = 1; i < k + 1; i++)
     {
         cin >> series[i];
     }
@@ -85,12 +86,13 @@ int main()
         read(d);
         read(c);
 
-        vector<int> series;
+        vector<int> series(c);
         rep(j, c)
         {
-            readpush(int, series);
+            dread(int, s);
+            series[j] = s;
         }
-        birthdays[i] = {d,series};
+        birthdays[i] = { d,series };
     }
 
     sort(all(birthdays));
@@ -103,7 +105,7 @@ int main()
         savedHours = 0;
         prev = birthdays[i].first + 1;
 
-        vector<int> daySeries = birthdays[i].second;
+        vector<int>& daySeries = birthdays[i].second;
         rep(j, daySeries.size())
         {
             int seriesIndex = daySeries[j];
@@ -131,6 +133,7 @@ int main()
 
 
     cout << "Ja";
+
 
     cout << endl;
     _Exit(0);
