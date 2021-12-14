@@ -77,7 +77,7 @@ void operator+=(std::pair<T, U>& l, const std::pair<T, U>& r)
 #define bitmap vector<vector<bool>>
 #define cleanmap pair<bitmap,int>
 
-
+// Global variables make heuristic problems a lot easier
 int bestScore = 0;
 string bestNew;
 string bestSequence;
@@ -86,14 +86,17 @@ p2 bestPos;
 int w;
 int h;
 
+// Kill any branches where the robot gets stuck
 const int illegalPenalty = 100;
 
 map<char, p2> directions = { {'>',{1,0}},{'<',{-1,0}},{'v',{0,1}},{'^',{0,-1}} };
 map<char, vector<char>> newDirection = { {'>',{'v','^','<'}}, {'<',{'v','^','>'}},{'v',{'>','^','<'}},{'^',{'v','>','<'}} };
 vector<char> allDirections = { '>','<','v','^' };
 
+// A vector for each depth to copy the grid
 vector<vector<bool>> copys;
 
+// Move the robot in a direction. Keeps track of what we've cleaned and gets a huge penalty if we enter an area which is a dead end, killing the branch
 inline pair<p2, vector<bool>&> move(bitmap& grid, bitmap& illegal, cleanmap& cleaned, p2& pos, char dir, int depth)
 {
     pair<p2, vector<bool>&> ret = { {(dir == '<' || dir == '>') ? pos.first : pos.second,-1}, copys[depth]};
@@ -219,127 +222,7 @@ inline pair<p2, vector<bool>&> move(bitmap& grid, bitmap& illegal, cleanmap& cle
 
 }
 
-
-void printgridplayer3(bitmap& grid, cleanmap& cleaned, p2& pos)
-{
-    int k = 0;
-    rep(j, grid.size())
-    {
-        vector<bool>& rowG = grid[j];
-        vector<bool>& rowC = cleaned.first[j];
-        rep(i, rowG.size())
-        {
-            k += rowC[i];
-            if (j == pos.second && i == pos.first)
-            {
-                cout << '_';
-            }
-            else
-            {
-                if (!rowG[i])
-                {
-                    cout << '#';
-                }
-                else if (rowC[i])
-                {
-                    cout << 'W';
-                }
-                else
-                {
-                    cout << '.';
-                }
-            }
-        }
-        write("");
-    }
-    write(k);
-}
-
-void printgridplayer4(bitmap& grid, cleanmap& cleaned, p2& pos, p2 x, p2 y)
-{
-    int k = 0;
-    repp(j, y.first, y.second)
-    {
-        vector<bool>& rowG = grid[j];
-        vector<bool>& rowC = cleaned.first[j];
-        string rowV = "";
-        repp(i, x.first, x.second)
-        {
-            k += rowC[i];
-            if (j == pos.second && i == pos.first)
-            {
-                rowV += '_';
-            }
-            else
-            {
-                if (!rowG[i])
-                {
-                    rowV += '#';
-                }
-                else if (rowC[i])
-                {
-                    rowV += 'W';
-                }
-                else
-                {
-                    rowV += '.';
-                }
-            }
-        }
-        write(rowV);
-    }
-    write(k);
-}
-
-
-void printgridplayer5(bitmap& grid, p2& pos, p2 x, p2 y)
-{
-    int k = 0;
-    repp(j, y.first, y.second)
-    {
-        vector<bool>& rowG = grid[j];
-        string rowV = "";
-        repp(i, x.first, x.second)
-        {
-            if (j == pos.second && i == pos.first)
-            {
-                rowV += '_';
-            }
-            else
-            {
-                if (!rowG[i])
-                {
-                    rowV += '#';
-                }
-                else
-                {
-                    rowV += '.';
-                }
-            }
-        }
-        write(rowV);
-    }
-    write(k);
-}
-
-int eval(cleanmap& cleaned)
-{
-    int k = 0;
-    rep(j, cleaned.first.size())
-    {
-        vector<bool>& rowC = cleaned.first[j];
-        rep(i, rowC.size())
-        {
-            k += rowC[i];
-        }
-    }
-    return k;
-}
-
-uniform_int_distribution<int> dist(0, 2);
-mt19937 rng(69);
-
-
+// Do a depth-limited search and select the locally best path
 void dls(bitmap& grid, bitmap& illegal, cleanmap& cleaned, p2 pos, char dir, int depth, string& seq)
 {
 
@@ -403,7 +286,7 @@ void dls(bitmap& grid, bitmap& illegal, cleanmap& cleaned, p2 pos, char dir, int
     }
 }
 
-
+// Move without cleaning anything. Useful for the BFS functions
 inline void movenoclean(bitmap& grid, p2& pos, char dir)
 {
     p2& direction = directions[dir];
@@ -461,6 +344,8 @@ inline void movenoclean(bitmap& grid, p2& pos, char dir)
 
 }
 
+
+// BFS down to the bottom
 pair<p2, string> bfsdown(bitmap& grid, p2 startpos)
 {
     bitmap visited = bitmap(h, vector<bool>(w));
@@ -497,9 +382,7 @@ pair<p2, string> bfsdown(bitmap& grid, p2 startpos)
     }
 }
 
-const int colLookHeight = 20;
-
-
+// Use BFS to find a column to go down. Extremely unoptimized, but it runs in ~0.3s, so who cares
 string bfsfind(bitmap& grid, set<int>& takenCols, p2 startpos)
 {
     bitmap visited = bitmap(h, vector<bool>(w));
@@ -528,7 +411,6 @@ string bfsfind(bitmap& grid, set<int>& takenCols, p2 startpos)
 
         if (p.second > 900 && p.second < 1002 && !setcontains(takenCols, p.first))
         {
-            //printgridplayer5(grid, p, { max(0,p.first - 20),min(w - 2,p.first + 40) }, { p.second - 20,min(w - 2,p.second + 50) });
             bool works = true;
             repp(i, 0, 102)
             {
@@ -561,7 +443,6 @@ string bfsfind(bitmap& grid, set<int>& takenCols, p2 startpos)
             toDo.emplace(mp(pc, seq + dir));
         }
     }
-    //cout << k;
     return "";
 }
 
@@ -585,6 +466,7 @@ int32_t main()
 
     cleanmap cleaned = mp(vector<vector<bool>>(h, vector<bool>(w)), 0);
 
+    // True for no wall
     bitmap grid = bitmap(h, vector<bool>(w, true));
     bitmap illegal = bitmap(h, vector<bool>(w));
 
@@ -592,9 +474,6 @@ int32_t main()
     bestSequence.reserve(n);
 
     p2 startPos = { -1,-1 };
-
-    vp2 dirs = { {0,1},{0,-1},{1,0},{-1,0} };
-
 
     rep(i, h)
     {
@@ -614,57 +493,36 @@ int32_t main()
     p2 origPos = startPos;
 
 
+    // Depth optimization
     //                     0  1  2  3  4  5  6  7  8  9  10
-    vector<int> depths = { 10,10,9, 13,12,11,11,10,10,11,9,10,10,10,10 };
+    vector<int> depths = { 10,10,9, 13,11,11,11,10,10,11,9 };
     int depth = depths[t];
-    /*if (t != 8)
-    {
-        quit;
-    }*/
+    //if (t != 4)
+    //{
+    //    quit;
+    //}
+
+    // For each depth, we want to make a copy of the column/row that is going to be modified.
+    // In order to increase performance, we can reuse these
     copys = vector<vector<bool>>(depth + 2, vector<bool>(w));
     bestNew.reserve(depth*2);
 
-
-    /*cleaned.first[startPos.second + 2][startPos.first] = true;
-    printgrid(cleaned);
-    pair<p2,vector<bool>> c = move(grid, cleaned,startPos, '^');
-
-    repp(i, c.first.first, c.first.second)
-    {
-        cleaned.first[startPos.second][i] = c.second[i - c.first.first];
-    }
-
-    repp(i, c.first.first, c.first.second)
-    {
-        cleaned.first[i][startPos.first] = c.second[i - c.first.first];
-    }
-
-    printgrid(cleaned);
-    deb*/
-    //printgridplayer(cleaned, startPos);
-
-    //cout << eval(cleaned) << "\n";
-
-
-
     if (t==10)
     {
+        // BFS down to the bottom of the grid
         pair<p2, string> m = bfsdown(grid, startPos);
 
         startPos = m.first;
         n -= m.second.size();
         bestSequence += m.second;
-        //cout << m.second;
+
         repe(c, m.second)
         {
             move(grid, illegal, cleaned, startPos, c, 0);
         }
 
-        /*move(grid, illegal, cleaned, startPos, '>', 0);
-        move(grid, illegal, cleaned, startPos, '^', 0);
-        printgridplayer4(grid, cleaned, startPos, { max(0,startPos.first - 20),min(w - 2,startPos.first + 40) }, { startPos.second - 20,min(w - 2,startPos.second + 50) });*/
-        //cout << bestSequence;
-
+        // There will be lots of gaps where we can go down, up again, then down, gaining 1000 score each time.
+        // Do this until we can't anymore, without doing the same column twice.
         set<int> takenCols;
         takenCols.insert(1);
         while (bestSequence.size() < origN)
@@ -673,74 +531,9 @@ int32_t main()
             repe(c, nextSeq)
             {
                 move(grid, illegal, cleaned, startPos, c, 0);
-                //printgridplayer4(grid, cleaned, startPos, { max(0,startPos.first - 20),min(w,startPos.first + 40) }, { startPos.second - 20,min(w,startPos.second + 50) });
             }
             bestSequence += nextSeq;
         }
-        //
-        //auto it = begin(seqsS);
-
-        //vector<pair<int, string>> bestmoves;
-        //vector<pair<int, string>> bestmoves2;
-
-
-        //repe(seq, seqsS)
-        //{
-        //    //bestSequence += (*it);
-        //    cleanmap before = cleaned;
-        //    p2 pBef = startPos;
-        //    int scoreBef = cleaned.second;
-        //    repe(c, *it)
-        //    {
-        //        move(grid, illegal, cleaned, startPos, c, 0);
-        //    }
-
-        //    bestmoves.emplace_back(-((cleaned.second - scoreBef) / (int)(*it).size()), *it);
-
-        //    cleaned = before;
-        //    startPos = pBef;
-
-        //    it = next(it);
-        //}
-
-        //sort(all(bestmoves));
-
-        //repe(seq, bestmoves)
-        //{
-        //    if (seq.second.empty())
-        //    {
-        //        continue;
-        //    }
-        //    //bestSequence += (*it);
-        //    int scoreBef = cleaned.second;
-        //    repe(c, seq.second)
-        //    {
-        //        move(grid, illegal, cleaned, startPos, c, 0);
-        //    }
-
-        //    bestmoves2.emplace_back(-((cleaned.second - scoreBef) / (int)(seq.second).size()), seq.second);
-
-
-
-        //}
-
-        //sort(all(bestmoves2));
-
-        //repe(m, bestmoves2)
-        //{
-        //
-        //    bestSequence += m.second;
-        //    if (bestSequence.size() > origN)
-        //    {
-        //        break;
-        //    }
-
-        //    repe(c, m.second)
-        //    {
-        //        move(grid, illegal, cleaned, startPos, c, 0);
-        //        //printgridplayer4(grid, cleaned, startPos, { max(0,startPos.first - 20),min(w - 2,startPos.first + 40) }, { startPos.second - 20,min(w-2,startPos.second + 50) });
-        //    }
-        //}
 
         bestSequence = bestSequence.substr(0, origN);
         cout << bestSequence;
@@ -748,19 +541,10 @@ int32_t main()
     }
 
 
-
     int prevScore = 0;
-    int n_illegals = 0;
-    vector<p2> illegals;
     while (n)
     {
-        //if (n-depth*2.5<0)
-        //{
-        //    repe(illegalb, illegals)
-        //    {
-        //        illegal[illegalb.second][illegalb.first] = false;
-        //    }
-        //}
+        // Do a depth-limited search and select the one with the best score
         bestScore = -inf;
         string newSeq;
         dls(grid, illegal, cleaned, startPos, '-', min(depth, n), newSeq);
@@ -774,26 +558,16 @@ int32_t main()
             move(grid, illegal, cleaned, startPos, c, 0);
         }
 
-
-        /*if (cleaned.second == prevScore)
+        // If we didn't increase our score, we're "stuck". Thus we backtrack a couple of steps and then mark the area as illegal.
+        // This will make the robot lose alot of score when going into illegal areas, thus it won't become stuck again
+        if (prevScore == cleaned.second)
         {
-            throw new runtime_error("");
-        }
-        else
-        {
-            prevScore = cleaned.second;
-        }*/
-        //printgridplayer(cleaned, beginPos);
-        //printgridplayer3(grid, cleaned, startPos);
-        if (prevScore == cleaned.second && t != 10)
-        {
-            n_illegals++;
-
             illegal[startPos.second][startPos.first] = true;
             illegal[beginPos.second][beginPos.first] = true;
-            illegals.emplace_back(startPos);
-            illegals.emplace_back(beginPos);
+
+            // Reset our board
             cleaned = mp(vector<vector<bool>>(h, vector<bool>(w)), 0);
+            // Undo a couple of steps
             bestSequence = bestSequence.substr(0, max(0, (int)(bestSequence.size() - float(depth * 2.8))));
             n = origN - bestSequence.size();
 
@@ -802,7 +576,6 @@ int32_t main()
             {
                 move(grid, illegal, cleaned, startPos, c, 0);
             }
-            //printgridplayer3(grid, cleaned, startPos);
         }
         else
         {
@@ -811,22 +584,8 @@ int32_t main()
         bestNew = "";
     }
 
-    //printgridplayer3(grid, cleaned, startPos);
-    //printgrid(cleaned);
-    //cout << eval(cleaned) << "\n";
-    //cout << n_illegals;
-
-    //if (eval(cleaned) == 1652)
-    //{
-    //cout << eval(cleaned) << "\n";
     cout << bestSequence;
-    //}
-    //else
-    //{
-    //    throw new runtime_error("");
-    //}
 
 
-    return 0;
-    //quit;
+    quit;
 }
