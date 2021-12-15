@@ -77,7 +77,7 @@ void operator+=(std::pair<T, U>& l, const std::pair<T, U>& r)
 #define bitmap vector<vector<bool>>
 #define cleanmap pair<bitmap,int>
 
-// Global variables make heuristic problems a lot easier
+
 int bestScore = 0;
 string bestNew;
 string bestSequence;
@@ -85,21 +85,20 @@ p2 bestPos;
 
 int w;
 int h;
-
-// Kill any branches where the robot gets stuck
+int t;
 const int illegalPenalty = 100;
 
 map<char, p2> directions = { {'>',{1,0}},{'<',{-1,0}},{'v',{0,1}},{'^',{0,-1}} };
 map<char, vector<char>> newDirection = { {'>',{'v','^','<'}}, {'<',{'v','^','>'}},{'v',{'>','^','<'}},{'^',{'v','>','<'}} };
 vector<char> allDirections = { '>','<','v','^' };
 
-// A vector for each depth to copy the grid
 vector<vector<bool>> copys;
 
-// Move the robot in a direction. Keeps track of what we've cleaned and gets a huge penalty if we enter an area which is a dead end, killing the branch
+// Move and make a copy of the state of the board before we moved
+// Very verbose to maximize performance
 inline pair<p2, vector<bool>&> move(bitmap& grid, bitmap& illegal, cleanmap& cleaned, p2& pos, char dir, int depth)
 {
-    pair<p2, vector<bool>&> ret = { {(dir == '<' || dir == '>') ? pos.first : pos.second,-1}, copys[depth]};
+    pair<p2, vector<bool>&> ret = { {(dir == '<' || dir == '>') ? pos.first : pos.second,-1}, copys[depth] };
     ret.second[0] = (cleaned.first[pos.second][pos.first]);
 
     int i = 1;
@@ -202,7 +201,7 @@ inline pair<p2, vector<bool>&> move(bitmap& grid, bitmap& illegal, cleanmap& cle
                 pos.second++;
                 ret.first.second = pos.second;
                 if (ret.first.first > ret.first.second) swap(ret.first.first, ret.first.second);
-                reverse(begin(ret.second), begin(ret.second)+i);
+                reverse(begin(ret.second), begin(ret.second) + i);
                 ret.first.second++;
                 return ret;
             }
@@ -222,13 +221,17 @@ inline pair<p2, vector<bool>&> move(bitmap& grid, bitmap& illegal, cleanmap& cle
 
 }
 
-// Do a depth-limited search and select the locally best path
+uniform_int_distribution<int> dist(0, 2);
+// A very carefully selected seed
+mt19937 rng(69);
+
 void dls(bitmap& grid, bitmap& illegal, cleanmap& cleaned, p2 pos, char dir, int depth, string& seq)
 {
 
     if (depth < 0)
     {
-        if (cleaned.second > bestScore)
+        // One of the biggest improvements would probably be a better tie-breaker
+        if (cleaned.second > bestScore || (t == 3 && cleaned.second == bestScore && dist(rng)))
         {
             bestScore = cleaned.second;
             bestNew = seq;
@@ -241,6 +244,7 @@ void dls(bitmap& grid, bitmap& illegal, cleanmap& cleaned, p2 pos, char dir, int
     if (dir != '-')
     {
         int oldScore = cleaned.second;
+        // Move and make a copy of the state of the board before we moved
         pair<p2, vector<bool>&> c = move(grid, illegal, cleaned, pos, dir, depth);
 
         if (depth == 0)
@@ -257,10 +261,9 @@ void dls(bitmap& grid, bitmap& illegal, cleanmap& cleaned, p2 pos, char dir, int
             }
         }
 
-
+        // Reset our move
         if (dir == '>' || dir == '<')
         {
-            //cleaned.first[pos.second] = copy;
             repp(i, c.first.first, c.first.second)
             {
                 cleaned.first[pos.second][i] = c.second[i - c.first.first];
@@ -344,61 +347,27 @@ inline void movenoclean(bitmap& grid, p2& pos, char dir)
 
 }
 
-
-// BFS down to the bottom
-pair<p2, string> bfsdown(bitmap& grid, p2 startpos)
+// Use BFS to find the bottom of the grid. Extremely unoptimized, but it runs in ~0.3s, so who cares
+string bfsdown(bitmap& grid, set<int>& takenCols, p2 startpos)
 {
+    unordered_map<char, string> dirMap = { {'<', "^v"}, {'>', "^v"}, {'^', "<>"}, {'v', "<>"}, {' ', "^v<>"} };
+
     bitmap visited = bitmap(h, vector<bool>(w));
     queue<pair<p2, string>> toDo;
     toDo.push(mp(startpos, ""));
 
     while (toDo.size())
     {
-        p2 p;
-        string seq;
-        tie(p,seq) = toDo.front();
-        toDo.pop();
-
-        if (p.second==h-2)
-        {
-            return mp(p, seq);
-        }
-
-        if (visited[p.second][p.first])
-        {
-            continue;
-        }
-        else
-        {
-            visited[p.second][p.first] = true;
-        }
-
-        repe(dir, allDirections)
-        {
-            p2 pc = p;
-            movenoclean(grid, pc, dir);
-            toDo.emplace(mp(pc, seq + dir));
-        }
-    }
-}
-
-// Use BFS to find a column to go down. Extremely unoptimized, but it runs in ~0.3s, so who cares
-string bfsfind(bitmap& grid, set<int>& takenCols, p2 startpos)
-{
-    bitmap visited = bitmap(h, vector<bool>(w));
-    queue<pair<p2, string>> toDo;
-    toDo.push(mp(startpos, ""));
-
-    int k = 0;
-    while (toDo.size())
-    {
-        k++;
         p2 p;
         string seq;
         tie(p, seq) = toDo.front();
         toDo.pop();
 
-
+        if (p.second == h - 2 && !setcontains(takenCols, p.first))
+        {
+            takenCols.insert(p.first);
+            return seq;
+        }
 
         if (visited[p.second][p.first])
         {
@@ -409,41 +378,14 @@ string bfsfind(bitmap& grid, set<int>& takenCols, p2 startpos)
             visited[p.second][p.first] = true;
         }
 
-        if (p.second > 900 && p.second < 1002 && !setcontains(takenCols, p.first))
-        {
-            bool works = true;
-            repp(i, 0, 102)
-            {
-                if (!grid[p.second + i][p.first])
-                {
-                    works = false;
-                    break;
-                }
-                if (p.second + i > 1004)
-                {
-                    break;
-                }
-            }
-
-            if (works)
-            {
-                takenCols.insert(p.first);
-                if (seq[seq.size()-1] != '^' && seq[seq.size()-1] != 'v')
-                {
-                    seq += 'v';
-                }
-                return seq;
-            }
-        }
-
-        repe(dir, allDirections)
+        char prev = seq.size() ? seq[seq.size() - 1] : ' ';
+        repe(dir, dirMap[prev])
         {
             p2 pc = p;
             movenoclean(grid, pc, dir);
             toDo.emplace(mp(pc, seq + dir));
         }
     }
-    return "";
 }
 
 
@@ -456,7 +398,7 @@ int32_t main()
     ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Release\\in.txt");
 #endif
 
-    dread(int, t);
+    read(t);
     read(h);
     read(w);
     dread(int, n);
@@ -474,6 +416,9 @@ int32_t main()
     bestSequence.reserve(n);
 
     p2 startPos = { -1,-1 };
+
+    vp2 dirs = { {0,1},{0,-1},{1,0},{-1,0} };
+
 
     rep(i, h)
     {
@@ -495,44 +440,61 @@ int32_t main()
 
     // Depth optimization
     //                     0  1  2  3  4  5  6  7  8  9  10
-    vector<int> depths = { 10,10,9, 13,11,11,11,10,10,11,9 };
+    vector<int> depths = { 10,10,9, 10,11,11,11,10,9,10,9,10,10,10,10 };
     int depth = depths[t];
-    //if (t != 4)
-    //{
-    //    quit;
-    //}
+    /*if (t != 10)
+    {
+        quit;
+    }*/
 
     // For each depth, we want to make a copy of the column/row that is going to be modified.
     // In order to increase performance, we can reuse these
     copys = vector<vector<bool>>(depth + 2, vector<bool>(w));
-    bestNew.reserve(depth*2);
+    bestNew.reserve(depth * 2);
 
-    if (t==10)
+
+
+    if (t == 10)
     {
+        set<int> takenCols;
+
         // BFS down to the bottom of the grid
-        pair<p2, string> m = bfsdown(grid, startPos);
+        string m = bfsdown(grid, takenCols, startPos);
 
-        startPos = m.first;
-        n -= m.second.size();
-        bestSequence += m.second;
-
-        repe(c, m.second)
+        bestSequence += m;
+        repe(c, m)
         {
             move(grid, illegal, cleaned, startPos, c, 0);
         }
 
-        // There will be lots of gaps where we can go down, up again, then down, gaining 1000 score each time.
-        // Do this until we can't anymore, without doing the same column twice.
-        set<int> takenCols;
-        takenCols.insert(1);
+        takenCols.insert(startPos.first);
         while (bestSequence.size() < origN)
         {
-            string nextSeq = bfsfind(grid, takenCols, startPos);
+            // There will be lots of gaps where we can go down, up again, then down, gaining 1000 score each time.
+            // Do this until we can't anymore, without going down the same column twice.
+            string nextSeq = bfsdown(grid, takenCols, startPos);
+            if (bestSequence.size() + nextSeq.size() > origN)
+            {
+                break;
+            }
             repe(c, nextSeq)
             {
                 move(grid, illegal, cleaned, startPos, c, 0);
             }
             bestSequence += nextSeq;
+        }
+
+        while (bestSequence.size() < origN)
+        {
+            bestScore = -inf;
+            string newSeq;
+            dls(grid, illegal, cleaned, startPos, '-', min(depth, origN - sz(bestSequence)), newSeq);
+            bestSequence += bestNew;
+
+            repe(c, bestSequence)
+            {
+                move(grid, illegal, cleaned, startPos, c, 0);
+            }
         }
 
         bestSequence = bestSequence.substr(0, origN);
@@ -542,6 +504,8 @@ int32_t main()
 
 
     int prevScore = 0;
+    int n_illegals = 0;
+    vector<p2> illegals;
     while (n)
     {
         // Do a depth-limited search and select the one with the best score
@@ -557,18 +521,20 @@ int32_t main()
         {
             move(grid, illegal, cleaned, startPos, c, 0);
         }
+        bestNew = "";
 
         // If we didn't increase our score, we're "stuck". Thus we backtrack a couple of steps and then mark the area as illegal.
         // This will make the robot lose alot of score when going into illegal areas, thus it won't become stuck again
-        if (prevScore == cleaned.second)
+        if (prevScore == cleaned.second && t != 10)
         {
+            n_illegals++;
+
             illegal[startPos.second][startPos.first] = true;
             illegal[beginPos.second][beginPos.first] = true;
-
             // Reset our board
             cleaned = mp(vector<vector<bool>>(h, vector<bool>(w)), 0);
             // Undo a couple of steps
-            bestSequence = bestSequence.substr(0, max(0, (int)(bestSequence.size() - float(depth * 2.8))));
+            bestSequence = bestSequence.substr(0, max(0, (int)(bestSequence.size() - float(depth * 2.7))));
             n = origN - bestSequence.size();
 
             startPos = origPos;
@@ -581,11 +547,10 @@ int32_t main()
         {
             prevScore = cleaned.second;
         }
-        bestNew = "";
     }
 
-    cout << bestSequence;
 
+    cout << bestSequence;
 
     quit;
 }
