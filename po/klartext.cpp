@@ -171,6 +171,59 @@ int32_t main()
         reverse(cipher.begin(), cipher.end());
         write(cipher);
     }
+    else if (type==5)
+    {
+        string cipher;
+        read(cipher);
+
+        map<string, char> keys = {
+            {"1110000", 'a'},
+            {"1110001", 'b'},
+            {"001010", 'c'},
+            {"001011", 'd'},
+            {"011100", 'e'},
+            {"011101", 'f'},
+            {"101010", 'g'},
+            {"101011", 'h'},
+            {"111001", 'i'},
+            {"00100", 'j'},
+            {"01010", 'k'},
+            {"01011", 'l'},
+            {"01111", 'm'},
+            {"10100", 'n'},
+            {"11000", 'o'},
+            {"11001", 'p'},
+            {"11101", 'q'},
+            {"0011", 'r'},
+            {"0100", 's'},
+            {"0110", 't'},
+            {"1000", 'u'},
+            {"1001", 'v'},
+            {"1011", 'w'},
+            {"1101", 'x'},
+            {"1111", 'y'},
+            {"000", 'z'}
+        };
+
+        string out = "";
+
+        while (cipher.size())
+        {
+            repe(key, keys)
+            {
+                if (cipher.size()>=key.first.size())
+                {
+                    if (cipher.substr(0,key.first.size()) == key.first)
+                    {
+                        cipher = cipher.substr(key.first.size());
+                        out += key.second;
+                        break;
+                    }
+                }
+            }
+        }
+        cout << out;
+    }
 
     quit;
 }
