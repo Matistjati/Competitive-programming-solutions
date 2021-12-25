@@ -122,6 +122,36 @@ string reverse2(string in, int depth)
 
 }
 
+
+string solve4(string in)
+{
+    if (in.size()==1)
+    {
+        return in;
+    }
+    string ret = "";
+    if (in.size()%2==0)
+    {
+        int low = in.size() / 2;
+        int high = in.size() / 2;
+        string left = in.substr(0, low);
+        string right = in.substr(high);
+        ret = solve4(right) + solve4(left);
+    }
+    else
+    {
+        int low = in.size() / 2;
+        int high = ceildiv(in.size(), 2);
+        string left = in.substr(0, low);
+        string right = in.substr(high);
+
+        ret = solve4(left) + in[in.size() / 2] + solve4(right);
+    }
+
+    return ret;
+}
+
+
 int32_t main()
 {
     fast();
@@ -164,12 +194,42 @@ int32_t main()
 
         cout << reverse2(cipher,0);
     }
+    else if (type==3)
+    {
+        //           0   1   2   3   4  5  6  7  8  9  10  11  12  13  14  15  16  17  18  19  20  21  22  23  24
+        vi perm = { 24, 21, 23, 20, 22, 9, 6, 8, 5, 7, 19, 16, 18, 15, 17, 4,  1,  3,  0,  2,  14, 11, 13, 10, 12, };
+
+        dread(string, cipher);
+        string out(cipher.size(),'-');
+
+
+        rep(i, cipher.size())
+        {
+            out[perm[i]] = cipher[i];
+        }
+        cout << out;
+        //123456789ABCDEFGHIJKLMNOP
+        //abcbbbcbbcdbacccdbbdcbbdc 0
+        //bbabadcbacadbcbacbbbcdddd 4
+        //dcdadddacbcaaddbadccccbca 2
+        //cbdabbacaabbabdddabbdcdbc 1
+        //ccaabcbcbdaddcddddbaaabcd 3
+        //cbbcbbadaddacddbbdcbbacad 5
+
+
+        //123456789ABCDEFGHIJKLMNOP
+        //cbdcbccbbbddbcbbbbaccbcda 0
+        //ccbddaaabcbdbdabbacddbbba 1
+        //acccbbdcdacacbddcadddadca 2
+        //dacabdbbccadbddbcacaddcad 3
+        //dddcdccadbbcbababbbabdcab 4
+        //daabcdaabdbbcbdbbccbdaddc 5
+    }
     else if (type == 4 && (!isTesting || type == testing))
     {
         string cipher;
         read(cipher);
-        reverse(cipher.begin(), cipher.end());
-        write(cipher);
+        cout << solve4(cipher);
     }
     else if (type==5)
     {
@@ -224,6 +284,7 @@ int32_t main()
         }
         cout << out;
     }
+
 
     quit;
 }
