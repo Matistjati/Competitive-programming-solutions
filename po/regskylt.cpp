@@ -1,11 +1,17 @@
+#undef _GLIBCXX_DEBUG                // disable run-time bound checking, etc
+#pragma GCC optimize("Ofast,inline") // Ofast = O3,fast-math,allow-store-data-races,no-protect-parens
+#pragma GCC optimize ("unroll-loops")
+
+#pragma GCC target("bmi,bmi2,lzcnt,popcnt")                      // bit manipulation
+#pragma GCC target("movbe")                                      // byte swap
+#pragma GCC target("aes,pclmul,rdrnd")                           // encryption
+#pragma GCC target("avx,avx2,f16c,fma,sse3,ssse3,sse4.1,sse4.2") // SIMD
+
 #include <bits/stdc++.h>
 //#include <bits/extc++.h>
 
 using namespace std;
 
-#pragma GCC target ("avx2")
-#pragma GCC optimization ("O3")
-#pragma GCC optimization ("unroll-loops")
 
 #define enablell 0
 
@@ -79,6 +85,8 @@ inline void fast() { ios::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
 template <typename T, typename U> void operator+=(std::pair<T, U>& l, const std::pair<T, U>& r) { l = { l.first + r.first,l.second + r.second }; }
 template <typename T> int sgn(T val) { return (T(0) < val) - (val < T(0)); }
 
+vvi plates;
+
 int nums[1771562];
 
 inline int plateToNum(int P[6])
@@ -100,6 +108,7 @@ int np[6];
 
 int plate(int P[6])
 {
+
     int matches = 0;
 
     matches += nums[plateToNum(P)];
