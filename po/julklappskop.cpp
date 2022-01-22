@@ -1,109 +1,119 @@
+#undef _GLIBCXX_DEBUG                // disable run-time bound checking, etc
+#pragma GCC optimize("Ofast,inline") // Ofast = O3,fast-math,allow-store-data-races,no-protect-parens
+#pragma GCC optimize ("unroll-loops")
+
+#pragma GCC target("bmi,bmi2,lzcnt,popcnt")                      // bit manipulation
+#pragma GCC target("movbe")                                      // byte swap
+#pragma GCC target("aes,pclmul,rdrnd")                           // encryption
+#pragma GCC target("avx,avx2,f16c,fma,sse3,ssse3,sse4.1,sse4.2") // SIMD
+
 #include <bits/stdc++.h>
+//#include <bits/extc++.h>
 
 using namespace std;
 
+#define enablell 1
+
 #define ll long long
-#define vi vector<ll>
+#if enablell
+    #define int ll
+    #define inf 2e18
+    #define float double
+#else
+    #define inf int(2e9)
+#endif
+#define vi vector<int>
 #define vvi vector<vi>
-#define p2 pair<ll, ll>
-#define p3 vi
-#define p4 vi
+#define vvvi vector<vvi>
+#define vvvvi vector<vvvi>
+#define vb vector<bool>
+#define vvb vector<vb>
+#define vvvb vector<vvb>
+#define p2 pair<int, int>
 #define vp2 vector<p2>
+#define vvp2 vector<vp2>
+#define vvvp2 vector<vvp2>
+#define p3 tuple<int,int,int>
 #define vp3 vector<p3>
-#define inf 2e9
-#define linf 1e17
+#define vvp3 vector<vp3>
+#define vvvp3 vector<vvp3>
+#define p4 tuple<int,int,int,int>
+#define vp4 vector<p4>
 
 #define read(a) cin >> a
+#define read2(a,b) cin >> a >> b
+#define write(a) cout << (a) << "\n"
+#define quit cout << endl; _Exit(0);
 #define dread(type, a) type a; cin >> a
 #define dread2(type, a, b) dread(type, a); dread(type, b)
-#define write(a) cout << (a) << endl
+#define dread3(type, a, b, c) dread2(type, a, b); dread(type, c)
+#define dread4(type, a, b, c, d) dread3(type, a, b, c); dread(type, d)
+#define dread5(type, a, b, c, d, e) dread4(type, a, b, c, d); dread(type, e)
 #ifdef _DEBUG
+#define noop cout << "";
 #define deb __debugbreak();
+#define debassert(expr) if (!(expr)) deb;
+#define debif(expr) if(expr) deb;
 #else
+#define noop ;
 #define deb ;
+#define debassert(expr) ;
+#define debif(expr) ;
 #endif
 
-#define readpush(type,a) {type temp; read(temp); a.push_back(temp);}
-#define readinsert(type,a) {type temp; read(temp); a.insert(temp);}
+#define rep(i, high) for (int i = 0; i < high; i++)
+#define repp(i, low, high) for (int i = low; i < high; i++)
+#define repe(i, container) for (auto& i : container)
+#define per(i, high) for (int i = high; i >= 0; i--)
+#define perr(i, low, high) for (int i = high; i >= low; i--)
+
+#define readvector(type, name, size) vector<type> name(size); rep(i,size) {dread(type,temp); name[i]=temp;}
+#define all(a) begin(a),end(a)
 #define setcontains(set, x) (set.find(x) != set.end())
 #define stringcontains(str, x) (str.find(x) != string::npos)
-#define all(a) begin(a),end(a)
-
-#define rep(i, high) for (ll i = 0; i < high; i++)
-#define repe(i, container) for (auto& i : container)
-#define per(i, high) for (ll i = high; i >= 0; i--)
+#define within(a, b, c, d) (a >= 0 && a < b && c >= 0 && c < d)
+#define sz(container) ((int)container.size())
+#define mp(a,b) (make_pair(a,b))
+#define first(a) (*begin(a))
 
 #define ceildiv(x,y) ((x + y - 1) / y)
 #define fract(a) (a-floor(a))
 
+auto Start = chrono::high_resolution_clock::now();
+#define rununtil(time) if (chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - Start).count() >= time) break;
 
-inline void fast()
+inline void fast() { ios::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL); }
+template <typename T, typename U> inline void operator+=(std::pair<T, U>& l, const std::pair<T, U>& r) { l = { l.first + r.first,l.second + r.second }; }
+template <typename T> inline int sgn(T val) { return (T(0) < val) - (val < T(0)); }
+template <typename Out> inline void split(const string& s, char delim, Out result) { istringstream iss(s);  string item; while (getline(iss, item, delim)) { *result++ = item; } }
+inline vector<string> split(const string& s, char delim) {vector<string> elems;split(s, delim, back_inserter(elems));return elems;}
+
+int ans(vvi& dp, map<int,vp2>& bestPresents, vi& keys, int k, int index, int seen, int score)
 {
-    ios::sync_with_stdio(false);
-    cin.tie(NULL); cout.tie(NULL);
+    if (index==keys.size())
+    {
+        return score;
+    }
+
+    int& v = dp[seen][index];
+
+    if (v != -1) return score + v;
+
+    int best = score;
+    best = max(best, ans(dp, bestPresents, keys, k, index + 1, seen, score));
+    repe(present, bestPresents[keys[index]])
+    {
+        if (seen & (1<<present.second)) continue;
+
+        best = max(best, ans(dp, bestPresents, keys, k, index+1, seen|(1<<present.second), score+present.first));
+    }
+
+    v = best - score;
+
+    return best;
 }
 
-template <size_t N>
-class LessThan {
-public:
-    bool operator() (const std::bitset<N>& lhs, const std::bitset<N>& rhs) const
-    {
-        size_t i = N;
-        while (i > 0) {
-            if (lhs[i - 1] == rhs[i - 1]) {
-                i--;
-            }
-            else if (lhs[i - 1] < rhs[i - 1]) {
-                return true;
-            }
-            else {
-                return false;
-            }
-        }
-        return false;
-    }
-};
-
-const int nmax = 100001;
-int best(vector<vp2>& presents, int k, vector<int>& branching, int index, string& takenColumns, int sum)
-{
-    if (index == presents.size())
-    {
-        return sum;
-    }
-
-    int ret = -inf;
-
-
-    int prev = presents[index][0].first;
-    int foundValid = 0;
-    rep(i, k)
-    {
-        p2 candidate = presents[index][i];
-        if (candidate.first != prev && foundValid > branching[index])
-        {
-            break;
-        }
-        else
-        {
-            prev = candidate.first;
-        }
-
-        if (takenColumns[candidate.second] == '1')
-        {
-            continue;
-        }
-
-        char prevState = takenColumns[candidate.second];
-        takenColumns[candidate.second] = '1';
-        foundValid++;
-        ret = max(ret, best(presents, k, branching, index + 1, takenColumns, sum - candidate.first));
-        takenColumns[candidate.second] = prevState;
-    }
-    return ret;
-}
-
-int main()
+int32_t main()
 {
     fast();
 
@@ -111,44 +121,39 @@ int main()
     ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
 #endif
 
-    int k;
-    int n;
-    read(k);
-    read(n);
+    dread2(int, k, n);
+
+    map<int,vp2> bestPresents;
 
 
-
-    vector<vp2> presents(k);
     rep(i, k)
     {
-        vp2 row(n);
+        vp2 presents(n);
         rep(j, n)
         {
-            dread(int, temp);
-            row[j] = {-temp,j};
+            dread(int, happy);
+            presents[j] = { happy,j };
         }
-        sort(all(row));
-        presents[i] = row;
+        sort(all(presents),greater<p2>());
+
+        rep(j, min(k,sz(presents)))
+        {
+            if (!setcontains(bestPresents, presents[j].second)) bestPresents[presents[j].second] = {};
+            bestPresents[presents[j].second].emplace_back(presents[j].first, i);
+        }
+
     }
 
-    vector<int> branching(k, 2);
-    if (presents[0][0].first % 2 == 0 || presents[0][1].first % 2 == 0 || presents[0][2].first % 2 != 0 || presents[0][3].first % 2 == 0 || presents[0][4].first % 2 != 0 || presents[0][5].first % 2 == 0 || presents[0][6].first % 2 != 0 || presents[0][7].first % 2 != 0 || presents[k - 1][0].first % 2 == 0 || presents[k - 1][n - 2].first % 2 != 0)
+    vi keys;
+    keys.reserve(bestPresents.size());
+    repe(present, bestPresents)
     {
-
-    }
-    else
-    {
-        branching = { 1, 1, 1, 1, 1, 1, 3, 3 };
+        keys.emplace_back(present.first);
     }
 
+    vvi dp(1 << k, vi(keys.size(),-1));
 
-    sort(all(presents));
-    int ans = 0;
-    string takenColumns = string(nmax, '0');
-    vector<int> takenRows(k, 0);
+    cout << ans(dp, bestPresents, keys, k, 0, 0, 0);
 
-    write(best(presents, k, branching, 0, takenColumns, 0));
-
-
-    return 0;
+    quit;
 }
