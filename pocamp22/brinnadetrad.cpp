@@ -118,17 +118,15 @@ int32_t main()
     priority_queue<int> dp;
 
     int sum = 0;
-    int prev = inf;
     rep(i, n)
     {
-        int prevsum = sum;
         dp.emplace(trees[i].second);
-        sum += trees[i].second;
-        if (prevsum > trees[i].first)
+        if (sum > trees[i].first)
         {
             sum -= dp.top();
             dp.pop();
         }
+        sum += trees[i].second;
     }
 
     cout << dp.size();
