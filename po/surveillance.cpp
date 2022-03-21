@@ -93,145 +93,129 @@ inline vector<string> split(const string& s, char delim) { vector<string> elems;
 
 int surveillance(int B, int W, int S[1000][1000], int T[1000][1000]) {
 
-	ll base = (ll)(31);
+    ll base = (ll)(31);
 
-	vector<int> nums;
-	nums.reserve(B * B);
-	rep(i, B-W+1)
-	{
-		rep(j, B-W+1)
-		{
-			nums.emplace_back(S[i][j]);
-		}
-	}
+    // Precompute base**i
+    const int precompSize = 1000 * 1000 + 1;
+    vector<ll> powtable(precompSize);
+    ll m = 1;
+    rep(i, precompSize)
+    {
+        powtable[i] = m;
+        m *= base;
+    }
 
-	unordered_map<ll,ll> hashes;
+    vector<vector<ll>> rows(B - W + 1, vector<ll>(B));
+    vector<vector<ll>> cols(B - W + 1, vector<ll>(B));
+    rep(i, B)
+    {
+        ll hashV = 0;
 
-	int precompSize = 1000 * 1000 + 1;
-	vector<ll> powtable(precompSize);
-	ll m = 1;
-	rep(i, precompSize)
-	{
-		powtable[i] = m;
-		m *= base;
-	}
+        int ind = B - (B - W) - 1;
+        perr(j, B - W, B)
+        {
+            hashV += powtable[ind] * S[i][j];
+            ind--;
+        }
+        ind = B - (B - W) - 1;
 
-	vector<vector<ll>> rows(B - W + 1,vector<ll>(B));
-	vector<vector<ll>> cols(B - W + 1,vector<ll>(B));
+        rows[B - W][i] = hashV;
 
-	rep(i, B)
-	{
+        per(j, B - 1)
+        {
+            if (B - W - (B - 1 - j) < 0) break;
+            hashV -= S[i][j + 1] * powtable[ind];
+            hashV *= base;
+            hashV += S[i][j - W + 1];
+            rows[B - W - (B - 1 - j)][i] = hashV;
+        }
+    }
 
-		ll hashV = 0;
+    rep(j, B)
+    {
+        ll hashV = 0;
 
-		int ind = B - (B - W)-1;
-		perr(j, B-W, B)
-		{
-			hashV += powtable[ind] * S[i][j];
-			ind--;
-		}
-		ind = B - (B - W) - 1;
+        int ind = (W * W - W);
+        perr(i, B - W, B)
+        {
+            hashV += powtable[ind] * S[i][j];
+            ind -= W;
+        }
+        ind = W * W - W;
 
-		rows[B-W][i] = hashV;
+        cols[B - W][j] = hashV;
 
-		per(j, B-1)
-		{
-			if (B - W - (B - 1 - j) < 0) break;
-			hashV -= S[i][j + 1]*powtable[ind];
-			hashV *= base;
-			hashV += S[i][j-W + 1];
-			rows[B-W-(B-1-j)][i] = hashV;
-		}
-	}
+        per(i, B - 1)
+        {
+            if (B - W - (B - 1 - i) < 0) break;
+            hashV -= S[i + 1][j] * powtable[ind];
+            hashV *= powtable[W];
+            hashV += S[i - W + 1][j];
+            cols[B - W - (B - 1 - i)][j] = hashV;
+        }
+    }
 
-	rep(j, B)
-	{
+    ll matches = 0;
+    ll hashThief = 0;
+    m = 1;
+    ll mul = 0;
+    rep(k, W)
+    {
+        rep(l, W)
+        {
+            hashThief += m * (T[k][l]);
+            mul += m;
+            m *= base;
+        }
+    }
 
-		ll hashV = 0;
+    // B security size
+    rep(i, B - W + 1)
+    {
+        ll hashV = 0;
+        ll m = 1;
 
-		int ind = (W*W-W);
-		perr(i, B - W, B)
-		{
-			hashV += powtable[ind] * S[i][j];
-			ind-=W;
-		}
-		ind = W*W-W;
+        rep(k, W)
+        {
+            hashV += rows[B - W][i + k] * m;
+            m *= powtable[W];
 
-		cols[B - W][j] = hashV;
+        }
 
-		per(i, B - 1)
-		{
-			if (B - W - (B - 1 - i) < 0) break;
-			hashV -= S[i+1][j] * powtable[ind];
-			hashV *= powtable[W];
-			hashV += S[i-W+1][j];
-			cols[B - W - (B - 1 - i)][j] = hashV;
-		}
-	}
+        ll hashW = hashThief + (S[i][B - W] - T[0][0]) * mul;
 
+        matches += (hashW == hashV);
 
-	// B security size
-	rep(i, B-W+1)
-	{
-		ll hashV = 0;
-		ll m = 1;
+        rep(j, B - W)
+        {
+            hashV -= cols[i][B - j - 1] * powtable[W - 1];
 
-		rep(k, W)
-		{
-			hashV += rows[B-W][i + k] * m;
-			m *= powtable[W];
+            hashV *= base;
+            hashV += cols[i][B - j - 1 - W];
 
-		}
+            ll hashW = hashThief + (ll)(S[i][B - W - j - 1] - T[0][0]) * mul;
+            matches += (hashW == hashV);
 
-		hashes[hashV]++;
+            //hashes[hashV]++;
+        }
+    }
 
-		rep(j, B-W)
-		{
-			hashV -= cols[i][B - j-1]*powtable[W-1];
-
-			hashV *= base;
-			hashV += cols[i][B - j - 1 - W];
-			hashes[hashV]++;
-		}
-	}
-
-
-	ll hashV = 0;
-	m = 1;
-	ll mul = 0;
-	rep(k, W)
-	{
-		rep(l, W)
-		{
-			hashV += m * (T[k][l]);
-			mul += m;
-			m *= base;
-		}
-	}
-
-	ll matches = 0;
-	repe(num, nums)
-	{
-		ll hashW = hashV + (num-T[0][0]) * mul;
-		matches += hashes[hashW];
-		hashes[hashW] = 0;
-	}
-
-
-	return matches;
+    return matches;
 }
 
 
-//
-//int32_t main() {
-//	ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
-//	dread2(int, B, W);
-//	int S[1000][1000], T[1000][1000];
-//	rep(i, B) rep(j, B) read(S[i][j]);
-//	rep(i, W) rep(j, W) read(T[i][j]);
-//
-//	printf("%d\n", surveillance(B, W, S, T));
-//}
+#ifdef local
+int32_t main()
+{
+    //ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
+    dread2(int, B, W);
+    int S[1000][1000], T[1000][1000];
+    rep(i, B) rep(j, B) read(S[i][j]);
+    rep(i, W) rep(j, W) read(T[i][j]);
+
+    printf("%d\n", surveillance(B, W, S, T));
+}
+#endif
 
 //int32_t main()
 //{
