@@ -96,17 +96,11 @@ inline vector<string> split(const string& s, char delim) { vector<string> elems;
 vb slowknapsack(vp2 nums, int r, int n, int m)
 {
     const int bsSZ = 2002 * 2002;
-    if (r> bsSZ)
-    {
-        throw new runtime_error("");
-        cout << "failed large";
-        quit;
-        return vb(sz(nums));
-    }
 
     bitset<bsSZ> bs[1001];
     bs[0].set(0);
 
+    // probs unnecessary, but helped with debugging and isnt the leading term
     sort(all(nums));
 
     repp(i, 1, nums.size()+1)
@@ -116,8 +110,6 @@ vb slowknapsack(vp2 nums, int r, int n, int m)
 
 
     vb selection;
-
-
 
     rep(k, 1002)
     {
@@ -159,66 +151,10 @@ vb slowknapsack(vp2 nums, int r, int n, int m)
             return selection;
         }
     }
-
-
-    throw new runtime_error("");
-    cout << "failed knapsack";
-    deb;
-    quit;
-}
-
-
-
-
-bool testgrids(int n, int m, vvi& input, vvi& grid)
-{
-    vi rowsum(n);
-    vi colsum(m);
-
-    rep(i, n)
-    {
-        int s = 0;
-        rep(j, m)
-        {
-            s += grid[i][j];
-        }
-        rowsum[i] = s;
-    }
-
-    rep(j, m)
-    {
-        int s = 0;
-        rep(i, n)
-        {
-            s += grid[i][j];
-        }
-        colsum[j] = s;
-    }
-
-    rep(i, n)
-    {
-        rep(j, m)
-        {
-            if (input[i][j] != abs(rowsum[i] - colsum[j]))
-            {
-                return false;
-            }
-        }
-    }
-
-    return true;
 }
 
 void solvesums(int n, int m, vi& rowsums, vi& colsums, vvi& input)
 {
-    if (accumulate(all(rowsums),0) != accumulate(all(colsums),0))
-    {
-        throw new runtime_error("");
-        cout << "failed different";
-        deb;
-        quit;
-    }
-
     priority_queue<p2> rows;
     priority_queue<p2> cols;
 
@@ -259,15 +195,6 @@ void solvesums(int n, int m, vi& rowsums, vi& colsums, vvi& input)
 
     }
 
-
-    if (!testgrids(n,m,input, grid))
-    {
-        cout << "failed WA";
-        throw new runtime_error("");
-        deb;
-    }
-
-
     rep(i, n)
     {
         rep(j, m)
@@ -284,7 +211,7 @@ int32_t main()
 {
     fast();
 
-#if 1
+#if 0
     ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
 #endif
 
@@ -299,12 +226,8 @@ int32_t main()
         }
     }
 
-
-
     bool colsame = true;
     bool rowsame = true;
-
-
 
     rep(i, n)
     {
@@ -332,12 +255,6 @@ int32_t main()
 
     if (n == 1) colsame = true;
     if (m == 1) rowsame = true;
-
-    if (n==1&&m==1)
-    {
-        cout << 0;
-        quit;
-    }
 
     if (rowsame && colsame)
     {
@@ -412,15 +329,9 @@ int32_t main()
 
                     v -= l;
                     v += h;
-
                 }
-
             }
-
-            while (true) n++;
-            return 0;
         }
-
     }
     else if (rowsame || colsame)
     {
@@ -452,10 +363,7 @@ int32_t main()
 
         vb chosen;
 
-
         chosen = slowknapsack(values, r, n, m);
-
-
 
         int colsum = 0;
         rep(i, m) colsum += (samegrid[0][i] * (chosen[i] ? 1 : -1));
@@ -473,8 +381,6 @@ int32_t main()
         vi rowsums(n, x);
         vi colsums(m);
         rep(i, m) colsums[i] = (samegrid[0][i] * (chosen[i] ? 1 : -1))+x;
-
-
 
         if (rotated)
         {
@@ -559,7 +465,6 @@ int32_t main()
                     {
                         debif(nonzeroRow == -1);
 
-
                         rep(i, m)
                         {
                             bool works = false;
@@ -592,7 +497,6 @@ int32_t main()
                             {
                                 deb;
                             }
-
                         }
 
 
@@ -612,7 +516,6 @@ int32_t main()
                         rep(i, n) rowsums[i] += x;
                         rep(i, m) colsums[i] += x;
 
-
                         if (accumulate(all(rowsums), 0) != accumulate(all(colsums), 0))
                         {
                             works = false;
@@ -624,37 +527,15 @@ int32_t main()
                     {
                         goto done;
                     }
-
                 }
             }
 
         done:;
 
-            if (works)
-            {
-                solvesums(n, m, rowsums, colsums, grid);
-            }
-            else
-            {
-                deb;
-                if (n==m)
-                {
-                    throw new runtime_error("");
-                    cout << "failed distinct n==m";
-                    while (true) n++;
-                }
-            }
-        }
-        else
-        {
-            deb;
-            throw new runtime_error("");
-            write(-1);
+            // it should work
+            solvesums(n, m, rowsums, colsums, grid);
         }
     }
-
-
-
 
     quit;
 }
