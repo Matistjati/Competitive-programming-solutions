@@ -93,24 +93,32 @@ template <typename Out> inline void split(const string& s, char delim, Out resul
 inline vector<string> split(const string& s, char delim) { vector<string> elems; split(s, delim, back_inserter(elems)); return elems; }
 
 
-struct Tree {
-	typedef int T;
-	static constexpr T unit = INT_MAX;
-	T f(T a, T b) { return min(a, b); } // (any associative fn)
-	vector<T> s; int n;
-	Tree(int n = 0, T def = unit) : s(2 * n, def), n(n) {}
-	void update(int pos, T val) {
-		for (s[pos += n] = val; pos /= 2;)
-			s[pos] = f(s[pos * 2], s[pos * 2 + 1]);
-	}
-	T query(int b, int e) { // query [b, e)
-		T ra = unit, rb = unit;
-		for (b += n, e += n; b < e; b /= 2, e /= 2) {
-			if (b % 2) ra = f(ra, s[b++]);
-			if (e % 2) rb = f(s[--e], rb);
-		}
-		return f(ra, rb);
-	}
+struct FenwickTreeMin {
+    vector<int> bit;
+    int n;
+    const int INF = (int)1e9;
+
+    FenwickTreeMin(int n) {
+        this->n = n;
+        bit.assign(n, INF);
+    }
+
+    FenwickTreeMin(vector<int> a) : FenwickTreeMin(a.size()) {
+        for (size_t i = 0; i < a.size(); i++)
+            update(i, a[i]);
+    }
+
+    inline int getmin(int r) {
+        int ret = INF;
+        for (; r >= 0; r = (r & (r + 1)) - 1)
+            ret = min(ret, bit[r]);
+        return ret;
+    }
+
+    inline void update(int idx, int val) {
+        for (; idx < n; idx = idx | (idx + 1))
+            bit[idx] = min(bit[idx], val);
+    }
 };
 
 int32_t main()
@@ -135,13 +143,12 @@ int32_t main()
 			ppl[idx] = { a,b };
 		}
 
-		Tree tree(n+1);
-
+		FenwickTreeMin tree(n+1);
 
 		int positives = 0;
 		rep(i, n)
 		{
-			int q = tree.query(0, ppl[i].first);
+			int q = tree.getmin(ppl[i].first);
 			if (ppl[i].second<q)
 			{
 				positives++;
