@@ -92,20 +92,6 @@ template <typename T> inline int sgn(T val) { return (T(0) < val) - (val < T(0))
 template <typename Out> inline void split(const string& s, char delim, Out result) { istringstream iss(s); string item; while (getline(iss, item, delim)) { *result++ = item; } }
 inline vector<string> split(const string& s, char delim) { vector<string> elems; split(s, delim, back_inserter(elems)); return elems; }
 
-long long degree(long long a, long long k, long long p) {
-    long long res = 1;
-    long long cur = a;
-
-    while (k) {
-        if (k % 2) {
-            res = (res * cur) % p;
-        }
-        k /= 2;
-        cur = (cur * cur) % p;
-    }
-    return res;
-}
-
 int32_t main()
 {
     fast();
@@ -114,70 +100,30 @@ int32_t main()
     ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
 #endif
 
-    // We call a choice of ? a permutation
-    // For each permutation, the answer is:
-    // Sum distance of each one to end of string - ((num_ones-1)*(num_ones)/2)
-    // Now to do it for all 2^q permutations
-    // The sum of distances is easy: each ? shows up 2^q/2 times, and each 1 shows up 2^q times
-    // For the ones(ones+1)/2, we use n choose k
-    // Number of times k bits are true: (n choose k)
-    // Do this for k=0 to k=n, and in the ones(ones+1)/2, add the number of ones that are already set
-    // Extra care is taken to compute n choose k mod m, using fermats little theorem
-    dread(string, in);
-
-    int mod = 1e9 + 7;
-
-    int n_q = 0;
-    rep(i, in.size()) n_q += in[i] == '?';
-
-    ll k = 1;
-    rep(i, n_q - 1) k = (k * 2) % mod;
-
-    ll k2 = (k * 2) % mod;
-
-    if (n_q==0)
+    dread2(int, n, k);
+    map<int, int> occurences;
+    rep(i, n)
     {
-        k = 1;
-        k2 = 1;
+        dread(int, v);
+        occurences[v]++;
     }
 
-    vector<ll> fact(n_q+1);
-    ll m = 1;
-    rep(i, n_q+1)
+    priority_queue<int> pq;
+    repe(v, occurences)
     {
-        fact[i] = m;
-        m = (m * (i + 1)) % mod;
+        pq.emplace(v.second);
     }
 
-    ll ans = 0;
-
-    int num_ones = 0;
-    rep(i, in.size())
+    while (k--)
     {
-        if (in[i]=='?')
-        {
-            ans = (ans+ ((in.size()-i-1) * k)) % mod;
-        }
-        else if (in[i]=='1')
-        {
-            num_ones++;
-            ans = (ans+((in.size()-i-1) * k2)) % mod;
-        }
+        int v = pq.top();
+        pq.pop();
+        v--;
+        v = max(v, 0);
+        pq.push(v);
     }
 
-    rep(i, n_q+1)
-    {
-        ll l = num_ones + i-1;
-        ll a = ((l * (l + 1) / 2) % mod);
-        ll m = (fact[i] * fact[n_q - i])%mod;
-
-        ll b = (fact[n_q] * degree(m,mod-2, mod)) % mod;
-        ll amount = (a * b) % mod;
-        ans = (mod+ans-amount)%mod;
-    }
-
-
-    cout << ans;
+    cout << pq.top();
 
     quit;
 }
