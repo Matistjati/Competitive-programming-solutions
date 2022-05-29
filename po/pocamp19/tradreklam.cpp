@@ -112,9 +112,11 @@ int fillcities(vp2& cities, vvp2& edges, vi& populations, int node, int par)
 }
 
 // Cities: first cost, second value
-vi best(vp2& cities, vvp2& edges, vi dp, int node, int par)
+// For each cost of each node, best is to either take this node or subset of children nodes
+void best(vp2& cities, vvp2& edges, vi& dp, int node, int par)
 {
     vi dp2(dp.size(), 0);
+
 
     rep(i, dp.size())
     {
@@ -131,12 +133,11 @@ vi best(vp2& cities, vvp2& edges, vi dp, int node, int par)
     {
         if (edge.first == par) continue;
 
-        dp = best(cities, edges, dp, edge.first, node);
+        best(cities, edges, dp, edge.first, node);
     }
 
-    rep(i, dp.size()) dp2[i] = max(dp2[i], dp[i]);
+    rep(i, dp.size()) dp[i] = max(dp2[i], dp[i]);
 
-    return dp2;
 }
 
 int32_t main()
@@ -152,7 +153,7 @@ int32_t main()
     vvp2 edges(n);
 
     vi populations(n);
-    rep(i, n-1) cin >> populations[i + 1];
+    rep(i, n - 1) cin >> populations[i + 1];
 
     rep(i, n - 1)
     {
@@ -169,11 +170,11 @@ int32_t main()
     fillcities(cities, edges, populations, 0, -1);
     cities[0].first = inf;
 
-    vi dp(b+1);
+    vi dp(b + 1);
 
-    vi ans = best(cities, edges, dp, 0, -1);
+    best(cities, edges, dp, 0, -1);
 
-    cout << *max_element(all(ans));
+    cout << *max_element(all(dp));
 
     quit;
 }
