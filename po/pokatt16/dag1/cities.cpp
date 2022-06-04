@@ -93,48 +93,50 @@ template <typename T> inline int sgn(T val) { return (T(0) < val) - (val < T(0))
 template <typename Out> inline void split(const string& s, char delim, Out result) { istringstream iss(s); string item; while (getline(iss, item, delim)) { *result++ = item; } }
 inline vector<string> split(const string& s, char delim) { vector<string> elems; split(s, delim, back_inserter(elems)); return elems; }
 
-#define nodeV pair<ll, deque<ll>>
+int n, k;
+vvi edges;
+ll ans = 0;
 
-int merge(deque<ll>& a, deque<ll>& b, int k)
+inline void merge(deque<ll>& a, deque<ll>& b)
 {
     if (a.size() < b.size()) swap(a, b);
 
-    int ret = 0;
-    for (int i = max(0, k-sz(b)+1); i < min(sz(a), k + 1); i++) ret += a[i] * b[k - i];
+    for (int i = max(0, k - sz(b) + 1); i < min(sz(a), k + 1); i++) ans += a[i] * b[k - i];
 
     rep(i, b.size()) a[i] += b[i];
-    return ret;
 }
 
-nodeV pathsLenK(int node, int parent, int k, vvi& edges)
+deque<ll> pathsLenK(int node, int parent)
 {
-    nodeV ret = { 0, {1} };
+    deque<ll> ret = {1};
 
     repe(edge, edges[node])
     {
         if (edge == parent) continue;
 
-        nodeV a = pathsLenK(edge, node, k, edges);
-        a.second.push_front(0);
+        deque<ll> a = pathsLenK(edge, node);
+        a.push_front(0);
 
-        ret.first += merge(ret.second, a.second, k) + a.first;
+        merge(ret, a);
     }
 
     return ret;
 }
 
-ll paths(int n, int k, int f[], int t[])
+ll paths(int N, int K, int f[], int t[])
 {
-    vvi edges(n);
+    n = N; k = K;
+    edges.resize(n);
 
-    rep(i, n-1)
+    rep(i, n - 1)
     {
         edges[f[i]].emplace_back(t[i]);
         edges[t[i]].emplace_back(f[i]);
     }
 
-    return pathsLenK(0, -1, k, edges).first;
+    pathsLenK(0, -1);
 
+    return ans;
 }
 
 
@@ -149,9 +151,9 @@ int32_t main()
 #endif
 
     dread2(int, n, k);
-    readvector(int, conA, n-1);
-    readvector(int, conB, n-1);
-    cout << paths(n,k,&conA[0], &conB[0]);
+    readvector(int, conA, n - 1);
+    readvector(int, conB, n - 1);
+    cout << paths(n, k, &conA[0], &conB[0]);
 
     quit;
 }
