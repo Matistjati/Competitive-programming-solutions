@@ -17,7 +17,8 @@ using namespace std;
 #define ll long long
 #if enablell
 #define int ll
-#define inf 2e18
+#define inf LLONG_MAX
+#define float double
 #else
 #define inf int(2e9)
 #endif
@@ -41,6 +42,7 @@ using namespace std;
 
 #define read(a) cin >> a
 #define read2(a,b) cin >> a >> b
+#define read3(a,b,c) cin >> a >> b >> c
 #define write(a) cout << (a) << "\n"
 #define quit cout << endl; _Exit(0);
 #define dread(type, a) type a; cin >> a
@@ -51,20 +53,18 @@ using namespace std;
 #ifdef _DEBUG
 #define noop cout << "";
 #define deb __debugbreak();
-#define debassert(expr) if (!(expr)) deb;
 #define debif(expr) if(expr) deb;
 #else
 #define noop ;
 #define deb ;
-#define debassert(expr) ;
 #define debif(expr) ;
 #endif
 
 #define rep(i, high) for (int i = 0; i < high; i++)
 #define repp(i, low, high) for (int i = low; i < high; i++)
 #define repe(i, container) for (auto& i : container)
-#define per(i, high) for (int i = high; i >= 0; i--)
-#define perr(i, low, high) for (int i = high; i >= low; i--)
+#define per(i, high) for (int i = high-1; i >= 0; i--)
+#define perr(i, low, high) for (int i = high-1; i >= low; i--)
 
 #define readvector(type, name, size) vector<type> name(size); rep(i,size) {dread(type,temp); name[i]=temp;}
 #define all(a) begin(a),end(a)
@@ -74,19 +74,25 @@ using namespace std;
 #define sz(container) ((int)container.size())
 #define mp(a,b) (make_pair(a,b))
 #define first(a) (*begin(a))
+#define indexpair(p, i) ((i==0)?p.first:p.second)
+#define chmax(a,b) ((a)=max((a),b))
+#define chmin(a,b) ((a)=min((a),b))
 
 #define ceildiv(x,y) ((x + y - 1) / y)
 #define fract(a) (a-floor(a))
 
 auto Start = chrono::high_resolution_clock::now();
-#define rununtil(time) if (chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - Start).count() >= time) break;
+#define elapsedmillis() (chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - Start).count())
+#define rununtil(time) if (elapsedmillis() >= time) break;
 
 inline void fast() { ios::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL); }
+template <typename T, typename U> inline void operator+=(std::pair<T, U>& l, const std::pair<T, U>& r) { l = { l.first + r.first,l.second + r.second }; }
+template <typename T> inline int sgn(T val) { return (T(0) < val) - (val < T(0)); }
+template <typename Out> inline void split(const string& s, char delim, Out result) { istringstream iss(s); string item; while (getline(iss, item, delim)) { *result++ = item; } }
+inline vector<string> split(const string& s, char delim) { vector<string> elems; split(s, delim, back_inserter(elems)); return elems; }
+inline int readint() { int v = 0; char c; while ((c = getchar()) != EOF && c != ' ' && c != '\n') { v *= 10; v += c - '0'; } return v; }
 
-template <typename T, typename U> void operator+=(std::pair<T, U>& l, const std::pair<T, U>& r) { l = { l.first + r.first,l.second + r.second }; }
-template <typename T> int sgn(T val) { return (T(0) < val) - (val < T(0)); }
-
-
+vi ans(int(1e6) + 10, -1);
 int32_t main()
 {
     fast();
@@ -95,41 +101,32 @@ int32_t main()
     ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
 #endif
 
-    dread2(int, n, q);
+    int n = readint();
+    int q = readint();
 
-    readvector(int, n_vaccines, n);
+    int d = 0;
 
-    vp2 persons(q);
-
-    rep(i, q)
+    rep(i, n)
     {
-        dread(int, t);
-        persons[i] = { t,i };
-    }
-
-    sort(all(persons));
-
-    int i = 0;
-
-    int cumTime = 0;
-
-    vi ans(q, -1);
-
-
-    rep(j, n)
-    {
-        cumTime += n_vaccines[j];
-        while (i < persons.size() && persons[i].first < cumTime)
+        int k = readint();
+        rep(j, k)
         {
-            ans[persons[i].second] = j+1;
-            i++;
+            ans[d] = i + 1;
+            d++;
         }
     }
 
-
     rep(i, q)
     {
-        cout << ans[i] << "\n";
+        int t = readint();
+        if (t < ans.size())
+        {
+            write(ans[t]);
+        }
+        else
+        {
+            write(-1);
+        }
     }
 
     quit;
