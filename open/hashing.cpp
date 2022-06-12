@@ -1,4 +1,3 @@
-// Pragmas for faster code
 #undef _GLIBCXX_DEBUG                // disable run-time bound checking, etc
 #pragma GCC optimize("Ofast,inline") // Ofast = O3,fast-math,allow-store-data-races,no-protect-parens
 #pragma GCC optimize ("unroll-loops")
@@ -13,7 +12,6 @@
 
 using namespace std;
 
-// Type definitions
 #define enablell 0
 
 #define ll long long
@@ -42,7 +40,6 @@ using namespace std;
 #define p4 tuple<int,int,int,int>
 #define vp4 vector<p4>
 
-// IO, debugging
 #define read(a) cin >> a
 #define read2(a,b) cin >> a >> b
 #define read3(a,b,c) cin >> a >> b >> c
@@ -53,80 +50,50 @@ using namespace std;
 #define dread3(type, a, b, c) dread2(type, a, b); dread(type, c)
 #define dread4(type, a, b, c, d) dread3(type, a, b, c); dread(type, d)
 #define dread5(type, a, b, c, d, e) dread4(type, a, b, c, d); dread(type, e)
-#define readvector(type, name, size) vector<type> name(size); rep(i,size) {dread(type,temp); name[i]=temp;}
 #ifdef _DEBUG
 #define noop cout << "";
 #define deb __debugbreak();
-#define debassert(expr) if (!(expr)) deb;
 #define debif(expr) if(expr) deb;
 #else
 #define noop ;
 #define deb ;
-#define debassert(expr) ;
 #define debif(expr) ;
 #endif
 
-// Loops
 #define rep(i, high) for (int i = 0; i < high; i++)
 #define repp(i, low, high) for (int i = low; i < high; i++)
 #define repe(i, container) for (auto& i : container)
 #define per(i, high) for (int i = high-1; i >= 0; i--)
 #define perr(i, low, high) for (int i = high-1; i >= low; i--)
 
-// Helper
+#define readvector(type, name, size) vector<type> name(size); rep(i,size) {dread(type,temp); name[i]=temp;}
 #define all(a) begin(a),end(a)
 #define setcontains(set, x) (set.find(x) != set.end())
+#define stringcontains(str, x) (str.find(x) != string::npos)
 #define within(a, b, c, d) (a >= 0 && a < b && c >= 0 && c < d)
+#define sz(container) ((int)container.size())
 #define mp(a,b) (make_pair(a,b))
-#define ceildiv(x,y) ((x + y - 1) / y)
+#define first(a) (*begin(a))
+#define indexpair(p, i) ((i==0)?p.first:p.second)
+#define chmax(a,b) ((a)=max((a),b))
+#define chmin(a,b) ((a)=min((a),b))
 
-// Heuristic time limit
+#define ceildiv(x,y) ((x + y - 1) / y)
+#define fract(a) (a-floor(a))
+
 auto Start = chrono::high_resolution_clock::now();
 #define elapsedmillis() (chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - Start).count())
 #define rununtil(time) if (elapsedmillis() >= time) break;
 
-// Helpers
 inline void fast() { ios::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL); }
 template <typename T, typename U> inline void operator+=(std::pair<T, U>& l, const std::pair<T, U>& r) { l = { l.first + r.first,l.second + r.second }; }
 template <typename T> inline int sgn(T val) { return (T(0) < val) - (val < T(0)); }
 template <typename Out> inline void split(const string& s, char delim, Out result) { istringstream iss(s); string item; while (getline(iss, item, delim)) { *result++ = item; } }
 inline vector<string> split(const string& s, char delim) { vector<string> elems; split(s, delim, back_inserter(elems)); return elems; }
+inline int readintsigned() { int v = 0; int sign = 1; char c = getchar(); if (c == '-') { sign = -1; } else { v += c - '0'; } while ((c = getchar()) != EOF && c != ' ' && c != '\n') { v *= 10; v += c - '0'; } return v * sign; }
+inline int readint() { int v = 0; char c; while ((c = getchar()) != EOF && c != ' ' && c != '\n') { v *= 10; v += c - '0'; } return v; }
 
 #define ull unsigned long long
-
-struct rollinghash
-{
-    vi suf, b;
-    int mod;
-    rollinghash(string& s, int base=131, int mod = 1e9 + 7) : mod(mod), suf(s.size() + 1), b(s.size() + 1)
-    {
-        b[0] = 1;
-        b[1] = base;
-
-        per(i, s.size())
-        {
-            suf[i] = ((ll)suf[i + 1] * base + (s[i] - 'a' + 1)) % mod;
-        }
-
-        repp(i, 2, s.size() + 1)
-        {
-            b[i] = (ll)b[i - 1] * b[1] % mod;
-        }
-    }
-
-    unsigned ll gethash(int l, int r) // [l, r]
-    {
-        ll v = suf[l] - (ll)suf[r + 1] * b[r - l + 1];
-        // Make sure that v is within [0, mod)
-        v %= mod;
-        v += mod;
-        v %= mod;
-
-        return v;
-    }
-};
-
-
 
 
 int32_t main()
@@ -137,22 +104,63 @@ int32_t main()
     ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
 #endif
 
-    dread(string, s);
+    string s;
+    char c;
+    while ((c = getchar()) != '\n')
+    {
+        s.push_back(c);
+    }
 
-    rollinghash r1(s, 131);
-    rollinghash r2(s, 53);
+    vi suf1(s.size() + 1), b1(s.size() + 1);
+    vi suf2(s.size() + 1), b2(s.size() + 1);
 
-    dread(int, q);
+    int mod = 1e9 + 7;
+    int base1 = 131;
+    int base2 = 53;
+
+    b1[0] = 1;
+    b1[1] = base1;
+    b2[0] = 1;
+    b2[1] = base2;
+
+    repp(i, 2, s.size() + 1)
+    {
+        b1[i] = (ll)b1[i - 1] * b1[1] % mod;
+        b2[i] = (ll)b2[i - 1] * b2[1] % mod;
+    }
+
+
+    per(i, s.size())
+    {
+        suf1[i] = ((ll)suf1[i + 1] * b1[1] + (s[i] - 'a' + 1)) % mod;
+        suf2[i] = ((ll)suf2[i + 1] * b2[1] + (s[i] - 'a' + 1)) % mod;
+    }
+
+
+
+    int q = readint();
 
     while (q--)
     {
-        dread2(int, l, r);
+        int l = readint();
+        int r = readint();
         r--;
 
-        ull hash = ((ull)r1.gethash(l, r) << 32) + r2.gethash(l, r);
+        ll h1 = suf1[l] - (ll)suf1[r + 1] * b1[r - l + 1];
+        h1 %= mod;
+        h1 += mod;
+        h1 %= mod;
+
+        ll h2 = suf2[l] - (ll)suf2[r + 1] * b2[r - l + 1];
+        h2 %= mod;
+        h2 += mod;
+        h2 %= mod;
+
+        ull hash = ((ull)h1 << 32) + h2;
 
         cout << hash << "\n";
     }
+
 
     quit;
 }
