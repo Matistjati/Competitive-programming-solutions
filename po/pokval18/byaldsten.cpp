@@ -90,7 +90,7 @@ template <typename T, typename U> inline void operator+=(std::pair<T, U>& l, con
 template <typename T> inline int sgn(T val) { return (T(0) < val) - (val < T(0)); }
 template <typename Out> inline void split(const string& s, char delim, Out result) { istringstream iss(s); string item; while (getline(iss, item, delim)) { *result++ = item; } }
 inline vector<string> split(const string& s, char delim) { vector<string> elems; split(s, delim, back_inserter(elems)); return elems; }
-inline int readintsigned() {int v = 0; int sign = 1; char c = getchar(); if (c=='-'){sign = -1;} else {v += c - '0';} while ((c = getchar()) != EOF && c != ' ' && c != '\n') { v *= 10; v += c - '0'; } return v*sign; }
+inline int readintsigned() { int v = 0; int sign = 1; char c = getchar(); if (c == '-') { sign = -1; } else { v += c - '0'; } while ((c = getchar()) != EOF && c != ' ' && c != '\n') { v *= 10; v += c - '0'; } return v * sign; }
 inline int readint() { int v = 0; char c; while ((c = getchar()) != EOF && c != ' ' && c != '\n') { v *= 10; v += c - '0'; } return v; }
 
 int32_t main()
@@ -102,41 +102,53 @@ int32_t main()
 #endif
 
     int n = readint();
-
-    vector<tuple<int, int, int>> people(n);
+    vector<int> meals(n);
+    vector<int> prefixMeals(n);
+    int s = 0;
     rep(i, n)
     {
-        int born = readint();
-        int death = readint();
-
-        people[i] = { born,death, i };
+        int happiness = readintsigned();
+        s += happiness;
+        prefixMeals[i] = s;
+        meals[i] = happiness;
     }
 
-    sort(all(people));
-    vector<int> n_speeches(n);
+    int ans = -inf;
 
+    ans = max(ans, meals[0]);
+    ans = max(ans, meals[n - 1]);
 
-    p3 prevOldest = { 0,0,-1 };
-    ll currOldest = 0;
-    rep(i, n)
+    vector<int> upqueries(n);
+    int biggest = -inf;
+    per(i, n)
     {
-        int born, death, index;
-        tie(born, death, index) = people[i];
+        biggest = max(biggest, prefixMeals[i]);
+        upqueries[i] = biggest - prefixMeals[i];
+    }
 
-        currOldest = max(currOldest, (ll)death);
-        if (death > get<1>(prevOldest))
+
+    vector<int> downqueries(n);
+    int smallest = 0;
+    for (int i = 0; i < n - 1; i++)
+    {
+        smallest = min(smallest, prefixMeals[i]);
+
+        if (i > 0)
         {
-            n_speeches[index] += min((ll)death - get<1>(prevOldest), (ll)death - born);
-            prevOldest = people[i];
+            downqueries[i] = prefixMeals[i - 1] - smallest;
         }
 
-
     }
 
-    rep(i, n)
+
+    for (int i = 1; i < n - 1; i++)
     {
-        write(n_speeches[i]);
+        int start = meals[i];
+        int maxGuaranteed = min(downqueries[i], upqueries[i]);
+        ans = max(ans, start + maxGuaranteed);
     }
+
+    write(ans);
 
 
     quit;
