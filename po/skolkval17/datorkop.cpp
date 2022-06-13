@@ -57,7 +57,7 @@ int possible(vector<pair<ll, pair<int, int>>>& sums, int index, int x, int y, in
     int bought = 0;
     while (x > 0 || y > 0)
     {
-        bool hasBought = false;
+        bool hashBought = false;
         for (int i = index; i < sums.size(); i++)
         {
             if (x - sums[i].second.first >= 0 && y - sums[i].second.second >= 0)
@@ -70,7 +70,7 @@ int possible(vector<pair<ll, pair<int, int>>>& sums, int index, int x, int y, in
                 break;
             }
         }
-        if (!hasBought)
+        if (!hashBought)
         {
             break;
         }
@@ -90,6 +90,7 @@ int main()
     dread5(int, x, a, y, b, n);
     int bestV = -inf;
     vector<pair<ll, pair<int, int>>> sums;
+
     for (int i = 0; i < x + 1; i++)
     {
         for (int j = 0; j < y + 1; j++)
@@ -127,20 +128,10 @@ int main()
 
     }
 
-    for (int i = highestPossible; i < sums.size(); i++)
-    {
-        if (possible(sums, i, x, y, n))
-        {
-            highestPossible = max(highestPossible, i);
-        }
 
-        if (i % 100 == 0)
-        {
-            auto End = std::chrono::high_resolution_clock::now();
-            std::chrono::duration<double, std::milli> Elapsed = End - Start;
-            if (Elapsed.count() >= 200)
-                break;
-        }
+    if (possible(sums, highestPossible+4, x, y, n))
+    {
+        highestPossible = max(highestPossible, highestPossible + 4);
     }
 
     cout << sums[highestPossible].first << endl;
