@@ -1,0 +1,6 @@
+main:
+    for 1000 {
+        forward
+    }
+    left
+    goto main

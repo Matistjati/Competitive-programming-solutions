@@ -1,0 +1,16 @@
+t:
+    right
+    gotoblocked t
+    goto midtwo
+    
+
+main:
+    
+    left
+    
+
+    gotoblocked t
+midtwo:
+    forward
+    goto main
+    
