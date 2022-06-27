@@ -1,19 +1,8 @@
-t:
-    left
-    gotoblocked t
-    goto midtwo
-
-sex:
-    right
-
-
-    gotoblocked t
-midtwo:
-    forward
-    goto sex
-
-
 main:
-    forward
-    goto t
-
+    right
+    for 125 {
+            gotoblocked main
+            forward
+            left
+    }
+    goto main
