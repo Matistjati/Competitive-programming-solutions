@@ -1,0 +1,17 @@
+logma:
+    right
+    goto segs
+
+main:
+        left
+        gotoblocked logma
+        
+        
+        segs:
+        forward
+        for 2 {
+            right
+            forward
+            gotoblocked main
+        }
+        

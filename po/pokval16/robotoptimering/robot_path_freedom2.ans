@@ -1,0 +1,13 @@
+main:
+    segs:
+    left
+    for 32 {
+            left
+            for 21 {
+                    forward
+                    left
+                    forward
+                    right
+            }
+    }
+    goto segs
