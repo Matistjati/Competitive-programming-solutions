@@ -1,16 +1,7 @@
-t:
-    right
-    gotoblocked t
-    goto midtwo
-    
-
 main:
-    
-    left
-    
-
-    gotoblocked t
-midtwo:
+    right
+    segs:
+    gotoblocked main
     forward
-    goto main
-    
+    left
+    goto segs
