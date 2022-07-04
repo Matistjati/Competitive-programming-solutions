@@ -8,13 +8,12 @@
 #pragma GCC target("avx,avx2,f16c,fma,sse3,ssse3,sse4.1,sse4.2") // SIMD
 
 #include <bits/stdc++.h>
-//#include <bits/extc++.h>
 
 using namespace std;
 
 #define enablell 0
 
-#define ll long long
+typedef long long ll;
 #if enablell
 #define int ll
 #define inf LLONG_MAX
@@ -40,10 +39,10 @@ using namespace std;
 #define p4 tuple<int,int,int,int>
 #define vp4 vector<p4>
 
-#define read(a) cin >> a
+//#define read(a) cin >> a
 #define read2(a,b) cin >> a >> b
 #define read3(a,b,c) cin >> a >> b >> c
-#define write(a) cout << (a) << "\n"
+//#define write(a) cout << (a) << "\n"
 #define quit cout << endl; _Exit(0);
 #define dread(type, a) type a; cin >> a
 #define dread2(type, a, b) dread(type, a); dread(type, b)
@@ -53,10 +52,12 @@ using namespace std;
 #ifdef _DEBUG
 #define noop cout << "";
 #define deb __debugbreak();
+#define debassert(expr) if (!(expr)) deb;
 #define debif(expr) if(expr) deb;
 #else
 #define noop ;
 #define deb ;
+#define debassert(expr) ;
 #define debif(expr) ;
 #endif
 
@@ -86,15 +87,31 @@ auto Start = chrono::high_resolution_clock::now();
 #define rununtil(time) if (elapsedmillis() >= time) break;
 
 inline void fast() { ios::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL); }
-template <typename T, typename U> inline void operator+=(std::pair<T, U>& l, const std::pair<T, U>& r) { l = { l.first + r.first,l.second + r.second }; }
+template <typename T, typename U> inline void operator+=(std::pair<T, U>&l, const std::pair<T, U>&r) { l = { l.first + r.first,l.second + r.second }; }
 template <typename T> inline int sgn(T val) { return (T(0) < val) - (val < T(0)); }
-template <typename Out> inline void split(const string& s, char delim, Out result) { istringstream iss(s); string item; while (getline(iss, item, delim)) { *result++ = item; } }
-inline vector<string> split(const string& s, char delim) { vector<string> elems; split(s, delim, back_inserter(elems)); return elems; }
+template <typename Out> inline void split(const string & s, char delim, Out result) { istringstream iss(s); string item; while (getline(iss, item, delim)) { *result++ = item; } }
+inline vector<string> split(const string & s, char delim) { vector<string> elems; split(s, delim, back_inserter(elems)); return elems; }
+inline int readintsigned() { int v = 0; int sign = 1; char c = getchar(); if (c == '-') { sign = -1; } else { v += c - '0'; } while ((c = getchar()) != EOF && c != ' ' && c != '\n') { v *= 10; v += c - '0'; } return v * sign; }
 inline int readint() { int v = 0; char c; while ((c = getchar()) != EOF && c != ' ' && c != '\n') { v *= 10; v += c - '0'; } return v; }
+inline string readstring() { string s; char c; while ((c = getchar()) != EOF && c != '\n') { s.push_back(c); } return s; }
+#if _MSC_VER > 0
+#define gc() getchar()
+typedef unordered_set<int> h;
+#else
+#include <bits/extc++.h>
+using namespace __gnu_pbds;
+#define gc() getchar_unlocked()
+struct chash { // large odd number for C
+    const uint64_t C = ll(4e18 * acos(0)) | 71;
+    ll operator()(ll x) const { return __builtin_bswap64(x * C); }
+};
+typedef __gnu_pbds::gp_hash_table<int, null_type, chash> h;
+
+#endif
 
 struct node
 {
-    set<int> edges;
+    h edges;
     stack<int> leafedges;
 };
 
@@ -106,11 +123,12 @@ int32_t main()
     ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
 #endif
 
+
     dread(int, n);
 
     vector<node> edges(n);
 
-    vi hasleafs, nexthasleafs;
+    queue<p2> hasleafs;
 
     rep(i, n)
     {
@@ -122,10 +140,10 @@ int32_t main()
             dread(int, e);
             edges[i].edges.insert(e);
 
-            if (m==1)
+            if (m == 1)
             {
                 if (edges[e].leafedges.empty())
-                    hasleafs.emplace_back(e);
+                    hasleafs.emplace(e, 1);
                 edges[e].leafedges.emplace(i);
             }
         }
@@ -135,33 +153,32 @@ int32_t main()
 
     while (hasleafs.size())
     {
-        nexthasleafs.clear();
+        int i, it;
+        tie(i,it) = hasleafs.front();
+        hasleafs.pop();
 
-        repe(i, hasleafs)
+        ans = max(ans, it);
+
+        edges[i].edges.erase(edges[i].leafedges.top());
+        edges[i].leafedges.pop();
+
+        if (edges[i].edges.size() == 1)
         {
-
-            edges[i].edges.erase(edges[i].leafedges.top());
-            edges[i].leafedges.pop();
-
-            if (edges[i].edges.size()==1)
+            int parent = *begin(edges[i].edges);
+            if (edges[parent].leafedges.empty())
             {
-                int parent = *begin(edges[i].edges);
-                if (edges[parent].leafedges.empty())
-                {
-                    nexthasleafs.emplace_back(parent);
-                }
-                edges[parent].leafedges.emplace(i);
+                hasleafs.emplace(parent,it+1);
             }
-
-            if (edges[i].leafedges.size())
-                nexthasleafs.emplace_back(i);
+            edges[parent].leafedges.emplace(i);
         }
 
-        hasleafs.swap(nexthasleafs);
-        ans++;
+        if (edges[i].leafedges.size())
+            hasleafs.emplace(i,it+1);
+
     }
 
     cout << ans;
+
 
     quit;
 }
