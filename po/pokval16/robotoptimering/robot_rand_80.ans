@@ -1,0 +1,16 @@
+segs:
+    right
+    gotoblocked segs
+    forward
+main:
+    left
+    zero:
+    gotoblocked segs
+    forward
+    left
+    for 17 {
+        forward
+    }
+    right
+    goto zero
+
