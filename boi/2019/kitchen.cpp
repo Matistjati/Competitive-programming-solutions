@@ -87,10 +87,10 @@ auto Start = chrono::high_resolution_clock::now();
 #define rununtil(time) if (elapsedmillis() >= time) break;
 
 inline void fast() { ios::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL); }
-template <typename T, typename U> inline void operator+=(std::pair<T, U>&l, const std::pair<T, U>&r) { l = { l.first + r.first,l.second + r.second }; }
+template <typename T, typename U> inline void operator+=(std::pair<T, U>& l, const std::pair<T, U>& r) { l = { l.first + r.first,l.second + r.second }; }
 template <typename T> inline int sgn(T val) { return (T(0) < val) - (val < T(0)); }
-template <typename Out> inline void split(const string & s, char delim, Out result) { istringstream iss(s); string item; while (getline(iss, item, delim)) { *result++ = item; } }
-inline vector<string> split(const string & s, char delim) { vector<string> elems; split(s, delim, back_inserter(elems)); return elems; }
+template <typename Out> inline void split(const string& s, char delim, Out result) { istringstream iss(s); string item; while (getline(iss, item, delim)) { *result++ = item; } }
+inline vector<string> split(const string& s, char delim) { vector<string> elems; split(s, delim, back_inserter(elems)); return elems; }
 inline int readintsigned() { int v = 0; int sign = 1; char c = getchar(); if (c == '-') { sign = -1; } else { v += c - '0'; } while ((c = getchar()) != EOF && c != ' ' && c != '\n') { v *= 10; v += c - '0'; } return v * sign; }
 inline int readint() { int v = 0; char c; while ((c = getchar()) != EOF && c != ' ' && c != '\n') { v *= 10; v += c - '0'; } return v; }
 inline string readstring() { string s; char c; while ((c = getchar()) != EOF && c != '\n') { s.push_back(c); } return s; }
@@ -130,7 +130,7 @@ int32_t main()
 
     rep(i, n)
     {
-        if (dishes[i]<k)
+        if (dishes[i] < k)
         {
             cout << "Impossible";
             quit;
@@ -140,15 +140,17 @@ int32_t main()
     vi dp(90010, -inf);
     dp[0] = 0;
 
+    vi next(dp);
+
     rep(i, chefs.size())
     {
         int uniques = min(n, chefs[i]);
         int working = chefs[i];
-        vi next(dp);
+
 
         repp(j, working, dp.size())
         {
-            next[j] = max(dp[j], dp[j - working]+uniques);
+            next[j] = max(dp[j], dp[j - working] + uniques);
         }
         dp = next;
     }
@@ -157,9 +159,9 @@ int32_t main()
 
     rep(i, dp.size())
     {
-        if (dp[i]>=n*k)
+        if (dp[i] >= n * k)
         {
-            if (i>=s)
+            if (i >= s)
             {
                 ans = min(ans, i - s);
             }
