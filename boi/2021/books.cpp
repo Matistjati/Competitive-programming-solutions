@@ -188,7 +188,6 @@ void answer(vector<int> v)
 
 int main()
 {
-    ifstream cin("C:\\Users\\Matis\\desktop\\books_data\\cases\\0018\\in.txt");
     int _;
     read2(_, N);
     read3(K, A, S);
@@ -222,7 +221,6 @@ void solve(int n, int k, ll a, int s)
     queryAns.resize(n, -inf);
 
 
-    int idx = n - 1;
 
     int lo = 0;
     int hi = n;
@@ -262,46 +260,30 @@ void solve(int n, int k, ll a, int s)
     // ~26 queries, log(n)+k
     // ans must be a subset of numbers < a such that their sum is within [a,2a]
     // they must be a segment, as we cannot jump over 2a (each is < a)
-    // do a binary search for the start of the subsegment, querying mid, mid+1 ..., mid+k-1
-    // log(n)*k+k+log(n) approx 193, < 200
 
-    lo = 0;
-    hi = n - k+1;
 
-    set<int> seen;
-    // worst binary search ever
+    set<int> todo;
+    rep(i, min(k, hi)) todo.insert(i);
+    repp(i, max(0,hi - k), hi) todo.insert(i);
 
-    while (true)
+    if (todo.size() < k) impossible();
+
+    vi idx(all(todo));
+    ll sum = 0;
+    rep(i, k) sum += skimwrapper(idx[i]);
+
+    rep(i, idx.size()-k+1)
     {
-        int mid = (lo + hi) / 2;
-
-
-
-        ll v = 0;
-        repp(i, mid, mid + k) v += skimwrapper(i);
-
-        if (v<a)
+        if (sum>=a&&sum<=2*a)
         {
-            lo = mid;
+            vi ans;
+            repp(j, i, i + k) ans.push_back(idx[j] + 1);
+            answer(ans);
         }
-        else
-        {
-            if (v>=a&&v<=2*a)
-            {
-                vi ans;
-                repp(i, mid, mid + k) ans.push_back(i + 1);
-                answer(ans);
-            }
-            hi = mid;
-        }
-
-        if (setcontains(seen, mid))
-        {
-            break;
-        }
-        seen.insert(mid);
+        sum -= skimwrapper(idx[i]);
+        if (i + k >= idx.size()) break;
+        sum += skimwrapper(idx[i + k]);
     }
-
 
     impossible();
 }
