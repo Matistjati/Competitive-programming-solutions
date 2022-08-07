@@ -118,7 +118,8 @@ enum instructionType
     call,
     ret,
     label,
-    noope
+    noope,
+    eof
 };
 
 struct instruction
@@ -161,12 +162,8 @@ inline bool isempty(p2 pos)
 #define bset 0
 #define closestD 1
 
-#if bset
-int score = -inf;
-vector<bitset<1001>> visitedsquares(1001);
-#else
+
 int score = inf;
-#endif
 
 #if VIS
 #define iterC int(1e8)
@@ -179,10 +176,6 @@ p2 simulate()
 #if VIS
     Board mazec(maze);
     ofstream cout("C:\\Users\\Matis\\Source\\repos\\Comp prog\\x64\\release\\out.txt");
-#endif
-
-#if bset
-    rep(i, 1001) visitedsquares[i].reset();
 #endif
 
     p2 pos = startpos;
@@ -242,18 +235,9 @@ p2 simulate()
         if (i == int(3e3) && abs(pos.first-startpos.first)+abs(pos.second- startpos.second)<t) goto end;
         if (i == int(1e4) && abs(pos.first-startpos.first)+abs(pos.second- startpos.second)<t) goto end;
         location++;
-        if (location<0)
-        {
-            location = 0;
-            cout << "ligma balls";
-            deb;
-        }
-        if (location >= progsize) goto end;
         instruction& in = program[location];
 
-#if bset
-        visitedsquares[pos.second].set(pos.first);
-#endif
+
 
 #if closestD
         if (abs(goal.first-pos.first)+abs(goal.second-pos.second)<d)
@@ -336,6 +320,8 @@ p2 simulate()
             break;
         case label:
             break;
+        case eof:
+            goto end;
         default:
             break;
         }
@@ -354,11 +340,6 @@ p2 simulate()
     return closest;
 #endif
 
-#if bset
-    int r = 0;
-    rep(i, 1001) r += visitedsquares[i].count();
-    return { r,d };
-#endif
 
     return pos;
 }
@@ -654,6 +635,7 @@ void buildprogram(vector<instruction>& program)
             i = 0;
         }
     }
+    program.push_back(instruction(eof));
 }
 
 void addi(instructionType what, string n="", int t=-1)
@@ -680,7 +662,7 @@ void generaterandomprogram()
 {
     program = vector<instruction>();
 
-    int costlen = 8 +randint(0, 6);
+    int costlen = 8 +randint(0, 5);
 
     vector<instructionType> instructions = { gotoblocked, forw,le,ri,loop };//  , call, ret
 
@@ -696,9 +678,12 @@ void generaterandomprogram()
 
     int cost = 0;
     int i = 0;
+    int maxloopnesting = 2;
+    int looplevel = 0;
+    uniform_int_distribution<int> usegoto(0, 5);
     while (cost<costlen)
     {
-        if (dist(rng))
+        if (usegoto(rng))
         {
             instructionType inst = instructions[dist(rng)];
             switch (inst)
@@ -714,7 +699,9 @@ void generaterandomprogram()
                 addi(inst);
                 break;
             case loop:
+                if (looplevel + 1 > maxloopnesting) continue;
                 addi(loop, randint(maxloop));
+                looplevel++;
                 loopendings.emplace(i+randint(costlen - cost), program.size());
                 break;
             default:
@@ -726,17 +713,20 @@ void generaterandomprogram()
             {
                 p2 p = loopendings.top();
                 loopendings.pop();
+                addi(label, "l" + to_string(i));
+                i++;
+                looplevel--;
                 addi(endloop);
             }
             cost++;
 
             addi(label, "l" + to_string(i));
+            i++;
         }
         else
         {
             addi(gotO);
         }
-        i++;
     }
 
     while (loopendings.size())
@@ -801,7 +791,7 @@ vi perm = {0,0,0,1,2};
 set<vi> visited;
 vvi instrs;
 int instrI = 0;
-int highperm = 8;
+int highperm = 7;
 
 void instrfill(int index, vi& values)
 {
@@ -810,7 +800,7 @@ void instrfill(int index, vi& values)
         instrs.push_back(values);
         return;
     }
-    rep(i, 5)
+    rep(i, 4)
     {
         values[index] = i;
         instrfill(index + 1, values);
@@ -912,7 +902,45 @@ void genstupidperm()
 
     program = vector<instruction>();
 
-    vector<instructionType> instructions = { noope,forw,le,ri,call };
+    vector<instructionType> instructions = { noope,forw,le,ri };
+
+    addi(label, "main");
+
+    instrI++;
+    if (instrI == instrs.size())
+    {
+        cout << instrI;
+        instrs = vvi();
+        vi values(highperm);
+        instrfill(0, values);
+        instrI = 0;
+    }
+    int c = 0;
+    repe(i, instrs[instrI]) c += (i != 0);
+    if (c > 2) return;
+
+
+    addi(instructions[instrs[instrI][0]]);
+    addi(instructions[instrs[instrI][1]]);
+    addi(loop, 1);
+    addi(instructions[instrs[instrI][2]]);
+    addi(label, "two");
+    addi(instructions[instrs[instrI][3]]);
+    addi(forw);
+    addi(gotoblocked, "six");
+    addi(gotO, "two");
+    addi(label, "six");
+    addi(ri);
+    addi(gotoblocked, "six");
+    addi(forw);
+    addi(le);
+    addi(instructions[instrs[instrI][4]]);
+    addi(endloop);
+    addi(instructions[instrs[instrI][5]]);
+    addi(instructions[instrs[instrI][6]]);
+    addi(gotO, "main");
+
+    return;
 
     instrI++;
     int counts = 0;
@@ -1018,21 +1046,23 @@ void parseprogram()
 
 const char* p = R"V0G0N(
 main:
-        for 11 {
-
-                right
-                for 29 {
-                        forward
-                        right
-                        forward
-                        forward
-                        left
-                        forward
-                        forward
-                }
-        }
-        right
-        goto main
+    for 12 {
+            right
+            for 40 {
+                    forward
+                    goto nine
+                    five:
+                    left
+                    gotoblocked ten
+                    forward
+                    right
+                    nine:
+                    gotoblocked five
+                    ten:
+            }
+    }
+    right
+    goto main
 )V0G0N";
 
 //const char* p = R"V0G0N(
@@ -1161,8 +1191,6 @@ main:
     }
 
     buildprogram(program);
-
-
 }
 
 int32_t main()
@@ -1223,7 +1251,7 @@ int32_t main()
     p2 ending = simulate();
     int newscore = calcscore(ending);
 #if VIS
-    cout << getprogramlen(program);
+    cout << newscore << " " << getprogramlen(program);
     return 0;
 #endif
     if (ending.first>23983598)
@@ -1233,7 +1261,7 @@ int32_t main()
 
 #if 0
 
-#define J 1
+#define J 0
     vi loopposses;
     rep(i, program.size()) if (program[i].what == loop) loopposses.push_back(i);
 
@@ -1248,14 +1276,19 @@ int32_t main()
             cout << "logma";
         }*/
 
+
+        parseprogram();
 #if J
         program[loopposses[1]].target = j;
         program[loopposses[1]].loopcounter = -inf;
 #endif
 
-        //parseprogram();
+
         program[loopposses[0]].target = i;
         program[loopposses[0]].loopcounter = -inf;
+
+        repe(p, loopposses) program[p].loopcounter = -inf;
+
         p2 p = simulate();
         int newscore = calcscore(p);
         if (newscore < score)
@@ -1274,6 +1307,7 @@ int32_t main()
             }*/
         }
     }
+    cout << "done";
 #endif
 
 #if 1
@@ -1290,47 +1324,33 @@ int32_t main()
         //else genstupid();
         //genstupidperm();
 
-
-
         buildprogram(program);
 
-#if bset
-        p2 newscore = simulate();
-#else
         p2 p = simulate();
         int newscore = calcscore(p);
 
         if (newscore < scorereq) newscore = calcscore_slow(program);
-        //newscore = calcscore_slow(program);
-
+        //newscore = calcscore_slow(program, 100);
         if (newscore < 500) newscore = calcscore_slow(program, 100);
-#endif
 
-#if bset
-        if (newscore.first>score)
-        {
-            bestprogram = program;
-            score = newscore.first;
-#else
 
         if (newscore < score)
         {
             bestprogram = program;
             score = newscore;
 
-#endif
-#if bset
-            cout << "score: " << score << ", distance: " << newscore.second << "\n";
-            printprogram();
-#else
+
             cout << p.first << " " << p.second << " , dist: " << score << ", len: " << getprogramlen(program) << "\n";
-#endif
             printprogram();
+
+            if (score==0)
+            {
+                cout << "checked: " << n_checked << "\n";
+                score = 1;
+            }
         }
-        if (score>inf)
-        {
-            cout << n_checked;
-        }
+        // Make sure n checked can be viewed during debugging
+        if (score>inf) cout << n_checked;
         n_checked++;
     }
     cout << n_checked;
