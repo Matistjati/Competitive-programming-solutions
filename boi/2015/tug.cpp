@@ -10,7 +10,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define enablell 1
+#define enablell 0
 
 typedef long long ll;
 const int mod = 1e9 + 7;
@@ -228,10 +228,28 @@ int32_t main()
     dp[0] = 1;
 
     int s = 0;
-    rep(i, cyclelens.size())
+
+    map<int,int> diffs;
+    rep(i, cyclelens.size()) diffs[abs(cyclelens[i].first - cyclelens[i].second)]++;
+
+    repe(diff,diffs)
     {
-        s += abs(cyclelens[i].first - cyclelens[i].second);
-        dp |= dp << 2*abs(cyclelens[i].first-cyclelens[i].second);
+
+
+
+        s += diff.first*diff.second;
+
+        vi items;
+        int k = 1;
+        while (diff.second > k)
+        {
+            items.push_back(k);
+            diff.second -= k;
+            k *= 2;
+        }
+        if (diff.second != 0) items.push_back(diff.second);
+
+        repe(item, items) dp |= dp << (2*diff.first*item);
     }
 
     repp(i, s, dp.size())
