@@ -51,7 +51,7 @@ typedef vector<p4> vp4;
 #define leading_zeros(x) __builtin_clz(x)
 #define bswap64(x) __builtin_bswap64(x)
 #define gc() getchar_unlocked()
-#if 1
+#if 0
 #include <bits/extc++.h>
 using namespace __gnu_pbds;
 struct chash { // large odd number for C
@@ -175,6 +175,8 @@ int32_t main()
     }
 
     dread(int, q);
+    vi leftVis(n,-1);
+    vi rightVis(n,-1);
     while (q--)
     {
         dread2(int, u, v);
@@ -184,13 +186,13 @@ int32_t main()
             continue;
         }
 
-        fast_map leftVis;
-        fast_map rightVis;
+
 
         queue<p3> q;
         q.emplace(u, 0, 0);
         q.emplace(v, 1, 0);
         int ans = 0;
+        vi vis;
         while (q.size())
         {
             int u, type, dist;
@@ -199,8 +201,8 @@ int32_t main()
 
             if (type==0)
             {
-                if (setcontains(leftVis, u)) continue;
-                if (setcontains(rightVis, u))
+                if (leftVis[u]!=-1) continue;
+                if (rightVis[u]!=-1)
                 {
                     ans = dist + rightVis[u];
                     break;
@@ -209,8 +211,8 @@ int32_t main()
             }
             if (type == 1)
             {
-                if (setcontains(rightVis, u)) continue;
-                if (setcontains(leftVis, u))
+                if (rightVis[u]!=-1) continue;
+                if (leftVis[u]!=-1)
                 {
                     ans = dist + leftVis[u];
                     break;
@@ -218,10 +220,17 @@ int32_t main()
                 rightVis[u] = dist;
             }
 
+            vis.emplace_back(u);
+
             repe(edge, edges[u])
             {
                 q.emplace(edge, type, dist + 1);
             }
+        }
+        repe(u, vis)
+        {
+            leftVis[u] = -1;
+            rightVis[u] = -1;
         }
         cout << ans << "\n";
     }
