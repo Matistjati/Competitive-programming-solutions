@@ -10,7 +10,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define enablell 1
+#define enablell 0
 
 typedef long long ll;
 typedef unsigned long long ull;
@@ -151,28 +151,39 @@ int32_t main()
 {
     fast();
 
-    int n;
+    dread(int, t);
     int FUCKYOU = 1;
-    while (cin >> n)
+    while (t--)
     {
+        cout << "Case #" << FUCKYOU << ":\n";
+        dread(int, n);
         readvector(int, nums, n);
+        map<int, vi> seensums;
 
-        vi sums;
-        rep(i, nums.size()) repp(j, i + 1, nums.size()) sums.push_back(nums[i] + nums[j]);
-        sort(all(sums));
-
-        cout << "Case " << FUCKYOU << ":\n";
-        dread(int, t);
-        while (t--)
+        rep(subset, (1 << n))
         {
-            dread(int, q);
-            auto it = lower_bound(all(sums), q);
+            int s = 0;
+            rep(j, n) if (subset & (1 << j)) s += nums[j];
 
-            int ans = inf;
-            if (it != begin(sums)) ans = *prev(it);
-            if (it != end(sums) && abs(q-*it) < abs(q-ans)) ans = * it;
-            cout << "Closest sum to " << q << " is " << ans << ".\n";
+            if (setcontains(seensums, s))
+            {
+                repe(otherSet, seensums[s])
+                {
+                    if ((subset&otherSet)==0)
+                    {
+                        rep(j, n) if (subset & (1 << j)) cout << nums[j] << " ";
+                        write("");
+                        rep(j, n) if (otherSet & (1 << j)) cout << nums[j] << " ";
+                        write("");
+                        goto end;
+                    }
+                }
+            }
+            seensums[s].push_back(subset);
+
         }
+        cout << "Impossible\n";
+    end:;
         FUCKYOU++;
     }
 

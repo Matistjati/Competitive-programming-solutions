@@ -10,7 +10,7 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-#define enablell 1
+#define enablell 0
 
 typedef long long ll;
 typedef unsigned long long ull;
@@ -151,31 +151,20 @@ int32_t main()
 {
     fast();
 
-    int n;
-    int FUCKYOU = 1;
-    while (cin >> n)
+    dread(int, t);
+    while (t--)
     {
-        readvector(int, nums, n);
+        dread3(int, c, b, n);
 
-        vi sums;
-        rep(i, nums.size()) repp(j, i + 1, nums.size()) sums.push_back(nums[i] + nums[j]);
-        sort(all(sums));
-
-        cout << "Case " << FUCKYOU << ":\n";
-        dread(int, t);
-        while (t--)
+        int ans = 0;
+        while (n>0)
         {
-            dread(int, q);
-            auto it = lower_bound(all(sums), q);
-
-            int ans = inf;
-            if (it != begin(sums)) ans = *prev(it);
-            if (it != end(sums) && abs(q-*it) < abs(q-ans)) ans = * it;
-            cout << "Closest sum to " << q << " is " << ans << ".\n";
+            int k = n % b;
+            ans += k * k;
+            n /= b;
         }
-        FUCKYOU++;
+        cout << c << " " << ans << "\n";
     }
-
 
     quit;
 }
