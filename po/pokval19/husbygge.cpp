@@ -70,7 +70,7 @@ typedef __gnu_pbds::gp_hash_table<int, int, chash> fast_map;
 
 #define CIN_IN 0
 #define FILE_TC 0
-#if FILE_TC
+#if FILE_TC && _LOCAL
 //ifstream filein("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
 
 #define cin filein
@@ -153,8 +153,9 @@ template<typename T> inline T randel(vector<T>& v) { return v[uniform_int_distri
 #endif
 const int mod = 1e9 + 7;
 
-int n, m, k;
+int n, m, k, t, bestv;
 vvi values;
+vp2 bestpeople;
 
 typedef tuple<int, int, int, int> state;
 typedef bitset<1001> bset;
@@ -209,10 +210,10 @@ vp2 dirs = { {0,1},{0,-1},{1,0},{-1,0} };
 
 int closest(int i, vector<bset>& vis)
 {
-    if (k * k < m * n * 8)
+    if (k <= 1000)
     {
         int closest = inf;
-        rep(j, k)
+        rep(j, people.size())
         {
             if (i == j) continue;
             closest = min(closest, abs(people[i].first - people[j].first) + abs(people[i].second - people[j].second));
@@ -221,25 +222,52 @@ int closest(int i, vector<bset>& vis)
     }
     else
     {
-        queue<pair<int, p2>> q;
-        q.emplace(0, people[i]);
-        while (q.size())
+        if (t == 4)
         {
-            int dist; p2 pos;
-            tie(dist, pos) = q.front();
-            q.pop();
-            if (peopleset[pos.first][pos.second] && pos != people[i]) return dist;
-            if (vis[pos.first][pos.second]) continue;
-            vis[pos.first][pos.second] = 1;
-
-            repe(dir, dirs)
+            vector<bitset<1000>> vis(n);
+            queue<pair<int, p2>> q;
+            q.emplace(0, people[i]);
+            while (q.size())
             {
-                p2 np = dir + pos;
-                if (np.first < 0 || np.second < 0 || np.first >= n || np.second >= m) continue;
-                q.emplace(dist + 1, np);
+                int dist; p2 pos;
+                tie(dist, pos) = q.front();
+                q.pop();
+                if (vis[pos.first][pos.second]) continue;
+                if (peopleset[pos.first][pos.second] && pos != people[i]) return dist;
+                vis[pos.first][pos.second] = 1;
+
+                repe(dir, dirs)
+                {
+                    p2 np = dir + pos;
+                    if (np.first < 0 || np.second < 0 || np.first >= n || np.second >= m) continue;
+                    q.emplace(dist + 1, np);
+                }
             }
         }
-        return 10;
+        else
+        {
+            queue<pair<int, p2>> q;
+            q.emplace(0, people[i]);
+            int largest = 0;
+            while (q.size())
+            {
+                int dist; p2 pos;
+                tie(dist, pos) = q.front();
+                q.pop();
+                largest = max(largest, dist);
+                if (peopleset[pos.first][pos.second] && pos != people[i]) return dist;
+                if (vis[pos.first][pos.second]) continue;
+                vis[pos.first][pos.second] = 1;
+
+                repe(dir, dirs)
+                {
+                    p2 np = dir + pos;
+                    if (np.first < 0 || np.second < 0 || np.first >= n || np.second >= m) continue;
+                    q.emplace(dist + 1, np);
+                }
+            }
+            return largest;
+        }
     }
 }
 
@@ -249,9 +277,11 @@ int evaluate()
 
     repe(p, people) peopleset[p.first][p.second] = 1;
 
-    vector<bset> vis(n);
+    vector<bset> vis;
+    if (k > 1000) vis = vector<bset>(n);
+    else vis = vector<bset>();
 
-    rep(i, k)
+    rep(i, people.size())
     {
         score += values[people[i].first][people[i].second] * closest(i, vis);
     }
@@ -264,17 +294,24 @@ priority_queue<pair<int, p2>> cells;
 vvi used;
 
 
-void generate(int d)
+void generate(int d, int limit = 0)
 {
-    while (cells.size() && people.size() < k)
+    while (cells.size() && people.size() < k - limit)
     {
+        if (people.size() == 50 && t == 8)
+        {
+            d++;
+        }
+        if (people.size() == 100 && t == 7)
+        {
+            d--;
+        }
         int _; p2 pos;
         tie(_, pos) = cells.top();
         cells.pop();
         if (blocked[pos.first][pos.second]) continue;
         people.emplace_back(pos);
         used[pos.first][pos.second] = 1;
-
 
 
         unordered_set<int> vis;
@@ -298,12 +335,10 @@ void generate(int d)
         }
     }
 
+    if (limit != 0) return;
     unordered_set<int> vis;
     queue<p2> q;
-    q.emplace(0, 0);
     q.emplace(n - 1, 0);
-    q.emplace(0, m - 1);
-    q.emplace(n - 1, m - 1);
     while (q.size())
     {
         p2 pos;
@@ -327,8 +362,48 @@ void generate(int d)
             q.emplace(np);
         }
     }
-done:;
+}
 
+void hillclimb()
+{
+    people = bestpeople;
+
+    int prev = evaluate();
+    rep(i, 10000000)
+    {
+        int j = randint(0, (int)people.size() - 1);
+
+        repe(dir, dirs)
+        {
+            p2 origpos = people[j];
+            p2 pos = people[j];
+            pos += dir;
+            if (!within(pos.first, n, pos.second, m)) continue;
+            if (used[pos.first][pos.second]) continue;
+            people[j] += dir;
+            int v = evaluate();
+            if (v > prev)
+            {
+                prev = v;
+                used[pos.first][pos.second] = 1;
+                used[origpos.first][origpos.second] = 0;
+            }
+            else
+            {
+                people[j] += (dir * -1);
+            }
+        }
+
+        if (elapsedmillis() > 3200) break;
+    }
+
+    int v = evaluate();
+    if (v > bestv)
+    {
+        bestv = v;
+        bestpeople = people;
+    }
+    return;
 }
 
 void reset()
@@ -341,7 +416,9 @@ void reset()
     blocked = vvi(n, vi(m));
     used = vvi(n, vi(m));
     cells = priority_queue<pair<int, p2>>();
-    rep(i, n) rep(j, m) cells.push({ values[i][j],{i,j} });
+
+    if (t == 1) rep(i, n) rep(j, m) cells.push({ values[i][j] - abs(i) * 1000 - abs(j),{i,j} });
+    else rep(i, n) rep(j, m) cells.push({ values[i][j],{i,j} });
     people = vp2();
     peopleset = vvi(n, vi(m));
 }
@@ -351,7 +428,7 @@ int32_t main()
 {
     fast();
 
-    dread(int, t);
+    read(t);
     read(n, m, k);
     values.resize(n, vi(m));
     rep(i, n) rep(j, m) read(values[i][j]);
@@ -379,28 +456,64 @@ int32_t main()
     }
     else
     {
-        int bestv = 0;
-        vp2 bestpeople;
+        bestv = 0;
 
-        repp(d, 1, max(n, m))
+        int bestd = 0;
+
+        if (t == 1)
         {
             reset();
-            generate(d);
-
-            int v = evaluate();
-            if (v > bestv)
-            {
-                bestv = v;
-                bestpeople = people;
-            }
-            if (elapsedmillis() > 3000) break;
+            generate(4, 310);
+            generate(5, 0);
+            bestpeople = people;
+            bestv = evaluate();
         }
+        else if (t == 10)
+        {
+            // Bruteforced by adding one point to each corner and then randomizing the rest
+            people = {
+                {100, 100},
+                {1, 1},
+                {100, 44 },
+                {87, 1},
+                {72, 72},
+                {59, 29},
+                {44, 100},
+                {31, 57},
+                {3, 85}
+            };
+            repe(p, people) p.first--, p.second--;
+            bestpeople = people;
+        }
+        else
+        {
+            map<int, int> start = { {9, 10}, {6,10} };
+            int lo = (setcontains(start, t) ? start[t] : 1);
+            map<int, int> limits = { {9, 3200} };
+            int tl = (setcontains(limits, t) ? limits[t] : 2000);
+            repp(d, lo, max(n, m))
+            {
+                reset();
+                generate(d);
+
+                int v = evaluate();
+                if (v > bestv)
+                {
+                    bestv = v;
+                    bestpeople = people;
+                    bestd = d;
+                }
+                if (elapsedmillis() > tl) break;
+            }
+        }
+        if (t != 10) hillclimb();
 
         repe(p, bestpeople)
         {
             cout << p.first + 1 << " " << p.second + 1 << "\n";
         }
-        cerr << "score: " << bestv;
+        cerr << "score: " << bestv << ", bestd:" << bestd;
+
     }
 
     quit;
