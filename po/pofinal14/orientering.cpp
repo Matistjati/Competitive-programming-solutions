@@ -61,9 +61,7 @@ int main()
 {
     fast();
 
-#if 0
-    ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
-#endif
+
 
     dread4(int, h, w, px, py);
     px--;
@@ -73,9 +71,9 @@ int main()
     readvector(string, area, h);
 
 
-    vector<vector<vector<int>>> visited(w, vector<vector<int>>(h,vector<int>(4, inf)));
-    queue<tuple<int, p2, char>> toDo;
-    toDo.push({0,{0,0},'>'});
+    vector<vector<vector<int>>> visited(w, vector<vector<int>>(h, vector<int>(4, inf)));
+    priority_queue<tuple<int, p2, char>> toDo;
+    toDo.push({ 0,{0,0},'>' });
 
     vector<tuple<char, int, int>> directions = { {'^',-1,0},{'v',1,0},{'<',0,-1},{'>',0,1} };
     map<char, int> dirToIndex = { {'^',0},{'v',1},{'<',2},{'>',3} };
@@ -86,7 +84,7 @@ int main()
         p2 pos;
         int n_ignored;
         char direction;
-        tie(n_ignored, pos,direction) = toDo.front();
+        tie(n_ignored, pos, direction) = toDo.top();
         n_ignored = -n_ignored;
         toDo.pop();
 
