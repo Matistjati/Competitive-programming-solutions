@@ -171,8 +171,8 @@ bool solve(const vector<string>& strings)
 
     ull base1 = randint(200, 10000);
     ull base2 = randint(200, 10000);
-    ull mod1 = 2147483647;
-    ull mod2 = 536870911;
+    ull mod1 = 1e9 + 7;
+    ull mod2 = 1e9 + 9;
     ull inv1 = binpow(base1, mod1 - 2, mod1);
     ull inv2 = binpow(base2, mod2 - 2, mod2);
 
@@ -183,17 +183,17 @@ bool solve(const vector<string>& strings)
 
         rep(i, s.size())
         {
-            h = (h + m * s[i]) & mod;
-            if (i != s.size() - 1) m = (m * base) & mod;
+            h = (h + m * s[i]) % mod;
+            if (i != s.size() - 1) m = (m * base) % mod;
         }
         vector<ull> ret(s.size());
         rep(i, s.size())
         {
             ret[i] = h;
 
-            h = ((int(h) - int(s[i])) % mod + mod) & mod;
-            h = (h * inv) & mod;
-            h = (h + s[i] * m) & mod;
+            h = ((int(h) - int(s[i])) % mod + mod) % mod;
+            h = (h * inv) % mod;
+            h = (h + s[i] * m) % mod;
         }
         return ret;
     };
