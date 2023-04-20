@@ -160,68 +160,58 @@ template<typename T> inline T randel(vector<T>& v) { return v[uniform_int_distri
 const ll mod = 1e9 + 7;
 vp2 dirs = { {0,1},{0,-1},{1,0},{-1,0} };
 
-int best(int i, int c, vp3& tstats, int p, vvi& dp)
-{
-    if (c < 0)
-    {
-        return -inf;
-    }
-    if (i == tstats.size())
-    {
-        return 0;
-    }
-
-    int k = (c != inf ? c : 501);
-    int& v = dp[i][k];
-    if (v != -1) return v;
-    int ret = 0;
-    int cap, wei, prof;
-    tie(cap, wei, prof) = tstats[i];
-
-    ret = max(ret, prof + best(i + 1, min(c - wei, cap), tstats, p + prof, dp));
-    ret = max(ret, best(i + 1, c, tstats, p, dp));
-
-    return v = ret;
-}
-
-int solveorder(vp3& turtles)
-{
-    int n = turtles.size();
-    const int f1 = 1;
-    const int f2 = 0;
-    sort(all(turtles), [](p3& a, p3& b)
-        {
-            return (get<f1>(a) + get<f2>(a)) > (get<f1>(b) + get<f2>(b));
-        });
-
-    vvi dp(n, vi(502, -1));
-    return best(0, inf, turtles, 0, dp);
-}
-
-int solveany(vp3& turtles)
-{
-    int n = turtles.size();
-
-    vvi dp(n, vi(502, -1));
-    return best(0, inf, turtles, 0, dp);
-}
 
 int32_t main()
 {
     fast();
 
 
-    dread(int, n);
-    vp3 turtles(n);
-    rep(i, n)
+    vector<string> board(7);
+    rep(i, 7)
     {
-        dread3(int, cap, wei, prof);
-        turtles[i] = { cap,wei,prof };
+        string s;
+        getline(cin, s);
+        board[i] = s;
     }
 
-    int best = 0;
-    best = max(best, solveorder(turtles));
-    cout << best;
+    int ans = 0;
+    rep(i, 7)
+    {
+        rep(j, 7)
+        {
+            p2 p = { i,j };
+            repe(dir, dirs)
+            {
+                p2 np1 = p;
+                if (board[np1.first][np1.second] != 'o')
+                {
+                    continue;
+                }
+                np1 = p + dir;
+
+                if (np1.first < 0 || np1.first >= 7 || np1.second < 0 || np1.second >= 7)
+                {
+                    continue;
+                }
+                if (board[np1.first][np1.second] != 'o')
+                {
+                    continue;
+                }
+                np1 = p + dir * -1;
+
+                if (np1.first < 0 || np1.first >= 7 || np1.second < 0 || np1.second >= 7)
+                {
+                    continue;
+                }
+                if (board[np1.first][np1.second] != '.')
+                {
+                    continue;
+                }
+                ans++;
+            }
+        }
+    }
+    cout << ans;
 
     quit;
 }

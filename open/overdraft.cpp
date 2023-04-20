@@ -160,68 +160,22 @@ template<typename T> inline T randel(vector<T>& v) { return v[uniform_int_distri
 const ll mod = 1e9 + 7;
 vp2 dirs = { {0,1},{0,-1},{1,0},{-1,0} };
 
-int best(int i, int c, vp3& tstats, int p, vvi& dp)
-{
-    if (c < 0)
-    {
-        return -inf;
-    }
-    if (i == tstats.size())
-    {
-        return 0;
-    }
-
-    int k = (c != inf ? c : 501);
-    int& v = dp[i][k];
-    if (v != -1) return v;
-    int ret = 0;
-    int cap, wei, prof;
-    tie(cap, wei, prof) = tstats[i];
-
-    ret = max(ret, prof + best(i + 1, min(c - wei, cap), tstats, p + prof, dp));
-    ret = max(ret, best(i + 1, c, tstats, p, dp));
-
-    return v = ret;
-}
-
-int solveorder(vp3& turtles)
-{
-    int n = turtles.size();
-    const int f1 = 1;
-    const int f2 = 0;
-    sort(all(turtles), [](p3& a, p3& b)
-        {
-            return (get<f1>(a) + get<f2>(a)) > (get<f1>(b) + get<f2>(b));
-        });
-
-    vvi dp(n, vi(502, -1));
-    return best(0, inf, turtles, 0, dp);
-}
-
-int solveany(vp3& turtles)
-{
-    int n = turtles.size();
-
-    vvi dp(n, vi(502, -1));
-    return best(0, inf, turtles, 0, dp);
-}
 
 int32_t main()
 {
     fast();
 
-
     dread(int, n);
-    vp3 turtles(n);
+    int sm = 0;
+    int t = 0;
     rep(i, n)
     {
-        dread3(int, cap, wei, prof);
-        turtles[i] = { cap,wei,prof };
+        dread(int, v);
+        t += v;
+        sm = min(sm, t);
     }
 
-    int best = 0;
-    best = max(best, solveorder(turtles));
-    cout << best;
+    cout << -sm;
 
     quit;
 }

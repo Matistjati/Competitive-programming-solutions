@@ -160,68 +160,50 @@ template<typename T> inline T randel(vector<T>& v) { return v[uniform_int_distri
 const ll mod = 1e9 + 7;
 vp2 dirs = { {0,1},{0,-1},{1,0},{-1,0} };
 
-int best(int i, int c, vp3& tstats, int p, vvi& dp)
-{
-    if (c < 0)
-    {
-        return -inf;
-    }
-    if (i == tstats.size())
-    {
-        return 0;
-    }
-
-    int k = (c != inf ? c : 501);
-    int& v = dp[i][k];
-    if (v != -1) return v;
-    int ret = 0;
-    int cap, wei, prof;
-    tie(cap, wei, prof) = tstats[i];
-
-    ret = max(ret, prof + best(i + 1, min(c - wei, cap), tstats, p + prof, dp));
-    ret = max(ret, best(i + 1, c, tstats, p, dp));
-
-    return v = ret;
-}
-
-int solveorder(vp3& turtles)
-{
-    int n = turtles.size();
-    const int f1 = 1;
-    const int f2 = 0;
-    sort(all(turtles), [](p3& a, p3& b)
-        {
-            return (get<f1>(a) + get<f2>(a)) > (get<f1>(b) + get<f2>(b));
-        });
-
-    vvi dp(n, vi(502, -1));
-    return best(0, inf, turtles, 0, dp);
-}
-
-int solveany(vp3& turtles)
-{
-    int n = turtles.size();
-
-    vvi dp(n, vi(502, -1));
-    return best(0, inf, turtles, 0, dp);
-}
-
 int32_t main()
 {
     fast();
 
+    dread(int, k);
 
-    dread(int, n);
-    vp3 turtles(n);
-    rep(i, n)
+    vi dp(k + 1000, inf);
+    dp[0] = 0;
+
+    rep(i, 1000)
     {
-        dread3(int, cap, wei, prof);
-        turtles[i] = { cap,wei,prof };
+        rep(j, dp.size())
+        {
+            if (j - 100 >= 0) dp[j] = min(dp[j], dp[j - 100] + 1);
+        }
     }
 
-    int best = 0;
-    best = max(best, solveorder(turtles));
-    cout << best;
+    rep(i, 1000)
+    {
+        rep(j, dp.size())
+        {
+            if (j - 200 >= 0) dp[j] = min(dp[j], dp[j - 200] + 1);
+        }
+    }
+
+    rep(i, 1000)
+    {
+        rep(j, dp.size())
+        {
+            if (j - 500 >= 0) dp[j] = min(dp[j], dp[j - 500] + 1);
+        }
+    }
+
+    int ans = inf;
+    repp(i, k, dp.size())
+    {
+        if (dp[i] != inf)
+        {
+            ans = dp[i];
+            break;
+        }
+    }
+
+    cout << ans;
 
     quit;
 }

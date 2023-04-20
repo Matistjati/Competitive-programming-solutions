@@ -160,68 +160,66 @@ template<typename T> inline T randel(vector<T>& v) { return v[uniform_int_distri
 const ll mod = 1e9 + 7;
 vp2 dirs = { {0,1},{0,-1},{1,0},{-1,0} };
 
-int best(int i, int c, vp3& tstats, int p, vvi& dp)
+void dfs(int k, vi& vis, vvi& edges, vi& l, int root)
 {
-    if (c < 0)
+
+    if (k == root)
     {
-        return -inf;
-    }
-    if (i == tstats.size())
-    {
-        return 0;
-    }
-
-    int k = (c != inf ? c : 501);
-    int& v = dp[i][k];
-    if (v != -1) return v;
-    int ret = 0;
-    int cap, wei, prof;
-    tie(cap, wei, prof) = tstats[i];
-
-    ret = max(ret, prof + best(i + 1, min(c - wei, cap), tstats, p + prof, dp));
-    ret = max(ret, best(i + 1, c, tstats, p, dp));
-
-    return v = ret;
-}
-
-int solveorder(vp3& turtles)
-{
-    int n = turtles.size();
-    const int f1 = 1;
-    const int f2 = 0;
-    sort(all(turtles), [](p3& a, p3& b)
+        repe(num, l)
         {
-            return (get<f1>(a) + get<f2>(a)) > (get<f1>(b) + get<f2>(b));
-        });
+            cout << num << " ";
+        }
+        quit;
+    }
+    if (vis[k]) return;
+    vis[k] = 1;
 
-    vvi dp(n, vi(502, -1));
-    return best(0, inf, turtles, 0, dp);
-}
+    repe(e, edges[k])
+    {
+        l.push_back(e);
+        dfs(e, vis, edges, l, root);
+        l.pop_back();
+    }
 
-int solveany(vp3& turtles)
-{
-    int n = turtles.size();
-
-    vvi dp(n, vi(502, -1));
-    return best(0, inf, turtles, 0, dp);
 }
 
 int32_t main()
 {
     fast();
 
-
-    dread(int, n);
-    vp3 turtles(n);
-    rep(i, n)
+    int k;
+    string s;
+    getline(cin, s);
+    k = stoi(s);
+    vvi edges(101);
+    vi indeg(101);
+    while (1)
     {
-        dread3(int, cap, wei, prof);
-        turtles[i] = { cap,wei,prof };
+        getline(cin, s);
+        vector<string> nums = split(s, ' ');
+        if (stoi(nums[0]) == -1)
+        {
+            break;
+        }
+        indeg[stoi(nums[0])]++;
+        repp(i, 1, nums.size())
+        {
+            edges[stoi(nums[i])].push_back(stoi(nums[0]));
+        }
+    }
+    int root = 0;
+    rep(i, 101)
+    {
+        if (indeg[i] && edges[i].size() == 0)
+        {
+            root = i;
+        }
     }
 
-    int best = 0;
-    best = max(best, solveorder(turtles));
-    cout << best;
+    vi vis(101);
+    vi l = { k };
+    dfs(k, vis, edges, l, root);
+
 
     quit;
 }
