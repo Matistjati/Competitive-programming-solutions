@@ -163,6 +163,25 @@ int32_t main()
 {
     fast();
 
+    dread(int, k);
+
+    int ans = 1;
+
+    int prev = 0;
+
+    rep(i, k)
+    {
+        dread(int, curr);
+        if (prev > curr)
+        {
+            ans += 1;
+        }
+        prev = curr;
+
+    }
+    cout << ans << "\n";
+
+
 
 
     quit;
