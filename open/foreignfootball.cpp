@@ -136,6 +136,8 @@ template <typename T> inline void write(T a) { cout << (a) << "\n"; }
 
 #define ceildiv(x,y) ((x + y - 1) / y)
 
+template<typename T> inline void eraseOne(multiset<T>& mSet, T k) { auto itr = mSet.find(k); if (itr != mSet.end()) { mSet.erase(itr); } }
+template<typename T, typename U> inline T first(U& a) { return *begin(a); }
 template <typename T, typename U> inline void operator+=(pair<T, U>& l, const pair<T, U>& r) { l = { l.first + r.first,l.second + r.second }; }
 template <typename T, typename U> inline pair<T, U> operator+(const pair<T, U> l, const pair<T, U> r) { return { l.first + r.first, l.second + r.second }; }
 template <typename T, typename U> inline pair<T, U> operator-(const pair<T, U> l, const pair<T, U> r) { return { l.first - r.first, l.second - r.second }; }
@@ -158,12 +160,130 @@ template<typename T> inline T randel(vector<T>& v) { return v[uniform_int_distri
 const ll mod = 1e9 + 7;
 vp2 dirs = { {0,1},{0,-1},{1,0},{-1,0} };
 
+void fail()
+{
+    cout << "NONE";
+    quit;
+}
 
 int32_t main()
 {
     fast();
 
+    dread(int, n);
 
+    vector<vector<string>> rows(n);
+    vvi size(n, vi(n));
+    rep(i, n)
+    {
+        rep(j, n)
+        {
+            dread(string, w);
+            rows[i].push_back(w);
+            size[i][j] = w.size();
+        }
+    }
+
+    if (n == 2)
+    {
+        int k = rows[0][1].size();
+        vi prefa(k);
+        vi sufa(k);
+        vi prefb(k);
+        vi sufb(k);
+
+        auto hash = [&](vi& pref, vi& suf, string& s, int shift, int mod)
+        {
+            const int base = 153;
+            int m = base;
+            int v = 0;
+            rep(i, k)
+            {
+                v = (v + s[i] * m) % mod;
+                m = (m * base) % mod;
+                pref[i] += v << shift;
+            }
+
+            m = 1;
+            v = 0;
+            per(i, k)
+            {
+                v = (base * (v + s[i])) % mod;
+                suf[i] += v << shift;
+            }
+        };
+        hash(prefa, sufa, rows[0][1], 0, 1e9 + 7);
+        hash(prefa, sufa, rows[0][1], 32, 1e9 + 9);
+
+        hash(prefb, sufb, rows[1][0], 0, 1e9 + 7);
+        hash(prefb, sufb, rows[1][0], 32, 1e9 + 9);
+
+        int sol = -1;
+        rep(i, k - 1)
+        {
+            if (prefa[i] == sufb[k - i - 1] && sufa[i + 1] == prefb[k - i - 2])
+            {
+                if (sol != -1)
+                {
+                    cout << "MANY";
+                    quit;
+                }
+                sol = i + 1;
+            }
+        }
+
+        if (sol == -1)
+        {
+            fail();
+        }
+
+        cout << "UNIQUE\n";
+        cout << rows[0][1].substr(0, sol) << "\n" << rows[0][1].substr(sol);
+    }
+    else
+    {
+        vi lengths(n, -1);
+        repp(i, 2, n)
+        {
+            int v = size[0][i] + size[1][i];
+            v -= size[0][1];
+            if (v % 2 == 1 || v <= 0) fail();
+            lengths[i] = v / 2;
+        }
+        int v = size[0][1] + size[0][2] - size[1][2];
+        if (v % 2 == 1 || v <= 0) fail();
+        lengths[0] = v / 2;
+        v = size[0][1] + size[1][2] - size[0][2];
+        if (v % 2 == 1 || v <= 0) fail();
+        lengths[1] = v / 2;
+
+        vector<string> strings(n);
+        repp(i, 1, n)
+        {
+            if (lengths[i] > rows[0][i].size()) fail();
+            strings[i] = rows[0][i].substr(rows[0][i].size() - lengths[i]);
+        }
+        if (lengths[0] > rows[1][0].size()) fail();
+        strings[0] = rows[0][1].substr(0, lengths[0]);
+
+        rep(i, n)
+        {
+            rep(j, n)
+            {
+                if (i == j) continue;
+                if (strings[i] + strings[j] != rows[i][j])
+                {
+                    fail();
+                }
+            }
+        }
+
+        cout << "UNIQUE\n";
+        rep(i, n)
+        {
+            cout << strings[i] << "\n";
+        }
+    }
 
     quit;
 }
