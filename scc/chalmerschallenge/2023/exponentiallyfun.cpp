@@ -374,7 +374,7 @@ int32_t main()
     }
 
 
-#if 1
+#if 0
     p2 dababy2 = solvesmart(in);
     int f = 0;
     if (in < 20000) f = dababy2.second;
