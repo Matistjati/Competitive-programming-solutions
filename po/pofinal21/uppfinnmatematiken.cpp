@@ -251,7 +251,7 @@ void greedybetter()
 
     while (taken.size() < n &&
 #if !_LOCAL
-        elapsedmillis() < 4500)
+        elapsedmillis() < 1900)
 #else
         true)
 #endif
@@ -385,7 +385,7 @@ void greedyfast()
 
     while (taken.size() < n &&
 #if !_LOCAL
-        elapsedmillis() < 4970)
+        elapsedmillis() < 1900)
 #else
         true)
 #endif
@@ -482,7 +482,7 @@ void solvelargetree()
     vp2 updatedstats(n);
     while (taken.size() < n &&
 #if !_LOCAL
-        elapsedmillis() < 4950)
+        elapsedmillis() < 1900)
 #else
         true)
 #endif
@@ -569,7 +569,7 @@ void solvereversetree()
     vp2 updatedstats(n);
     while (taken.size() < n &&
 #if !_LOCAL
-        elapsedmillis() < 4980)
+        elapsedmillis() < 1900)
 #else
         true)
 #endif
