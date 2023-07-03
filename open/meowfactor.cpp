@@ -154,12 +154,33 @@ template<typename T, typename U> inline int randint(T lo, U hi) { return uniform
 template<typename T> inline T randel(vector<T>& v) { return v[uniform_int_distribution<int>(int(0), int(v.size()) - int(1))(rng)]; } // [lo,hi]
 #endif
 const ll mod = 1e9 + 7;
-vp2 dirs = { {0,1},{0,-1},{1,0},{-1,0}, {0,0} };
-
+vp2 dirs = { {0,1},{0,-1},{1,0},{-1,0} };
 
 int32_t main()
 {
 	fast();
+
+	dread(int, n);
+
+	per(k, 200)
+	{
+		int v = n;
+		bool yes = 1;
+		rep(j, 9)
+		{
+			if (v % k != 0)
+			{
+				yes = 0;
+				break;
+			}
+			v /= k;
+		}
+		if (yes)
+		{
+			cout << k;
+			break;
+		}
+	}
 
 	quit;
 }
