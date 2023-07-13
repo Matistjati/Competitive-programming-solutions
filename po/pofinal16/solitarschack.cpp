@@ -157,116 +157,347 @@ template<typename T> inline T randel(vector<T>& v) { return v[uniform_int_distri
 const ll mod = 1e9 + 7;
 vp2 dirs = { {0,1},{0,-1},{1,0},{-1,0}, {0,0} };
 
-vvi edges;
-vi tin;
-vi tout;
-vi depth;
-int up[int(2e5) + 10][19];
-int timer = 0;
-
-void dfs(int u, int p, int d, vvi& edges)
+enum Piece
 {
-	depth[u] = d;
-	tin[u] = timer++;
-	up[u][0] = p;
-	repp(d, 1, 19)
-	{
-		up[u][d] = up[up[u][d - 1]][d - 1];
-	}
-
-	repe(e, edges[u]) if (e != p) dfs(e, u, d + 1, edges);
-
-	tout[u] = timer++;
-}
-
-int isancestor(int a, int b)
+	k1,
+	k2,
+	k3,
+	k4,
+	tower,
+	bishop,
+	queen,
+	horse,
+	unknown,
+	none
+};
+struct cell
 {
-	return tin[a] <= tin[b] && tout[a] >= tout[b];
-}
+	Piece piece;
+	int tier;
+};
+map<string, Piece> piecemap;
 
-int dist(int a, int b, int p)
+struct state
 {
-	if (isancestor(a, b)) return depth[b] - depth[a];
-	if (isancestor(b, a)) return depth[a] - depth[b];
+	int score = 0;
+	Piece lastpiece = none;
+	int numsame = 0;
+	p2 lastplace = p2(-1, -1);
+	vector<Piece> lastfour;
+	vi sets;
 
-	int lc = a;
-	per(d, 19)
+	state copy()
 	{
-		if (!isancestor(up[lc][d], b))
-		{
-			lc = up[lc][d];
-		}
-	}
-	return depth[a] + depth[b] - 2 * depth[up[lc][0]];
-}
-
-struct UF
-{
-	vi par;
-	vp2 dp;
-
-	UF(int n) : par(n), dp(n, p2(-inf, inf))
-	{
-		rep(i, n) par[i] = i;
-	}
-
-	int find(int x) { return x == par[x] ? x : par[x] = find(par[x]); }
-
-	void add(int a, int b)
-	{
-		a = find(a);
-		b = find(b);
-		par[b] = a;
+		state s = state();
+		s.score = score; s.lastpiece = lastpiece;
+		s.numsame = numsame;
+		s.lastplace = lastplace;
+		s.lastfour = lastfour;
+		s.sets = sets;
+		return s;
 	}
 };
+stack<state> states;
+vector<vector<cell>> board;
+
+inline bool isinside(const p2& p)
+{
+	return p.first >= 0 && p.second >= 0 && p.second < 6 && p.first < 6;
+}
+
+#if !_LOCAL
+Piece getnewpiece(p2 p)
+{
+	dread(string, s);
+	if (s == "blank") return none;
+	return piecemap[s];
+}
+#else
+Piece getnewpiece(p2 p)
+{
+	if (board[p.first][p.second].tier == 2)
+	{
+		return none;
+	}
+	//vector<Piece> options = { k1 };
+	//vector<Piece> options = { k1,k2,k3,k4 };
+	vector<Piece> options = { k1,k2,k3,k4,tower,horse,bishop,queen };
+	return randel(options);
+
+}
+#endif
+
+void saymove(p2 p)
+{
+	cout << p.first + 1 << " " << p.second + 1 << endl;
+}
+
+void visualize()
+{
+	rep(i, 6)
+	{
+		rep(j, 6)
+		{
+			char c = '?';
+			Piece p = board[i][j].piece;
+			if (p == k1) c = '1';
+			if (p == k2) c = '2';
+			if (p == k3) c = '3';
+			if (p == k4) c = '4';
+			if (p == none) c = '.';
+			if (p == unknown) c = 'x';
+			if (p == tower) c = 'T';
+			if (p == horse) c = 'H';
+			if (p == queen) c = 'Q';
+			if (p == bishop) c = 'B';
+			cout << c;
+		}
+		cout << "\n";
+	}
+}
+
+void die()
+{
+	cout << 0 << " " << 0 << endl;
+#if _LOCAL
+	visualize();
+#endif
+	quit;
+}
+
+void domove(p2 p, bool fake = 0)
+{
+	if (!fake) saymove(p);
+	state newstate;
+	newstate = states.top().copy();
+	newstate.score++;
+
+
+	if (board[p.first][p.second].piece == newstate.lastpiece) newstate.numsame++;
+	else newstate.numsame = 1;
+	if (newstate.numsame == 2) newstate.score += 4;
+	else if (newstate.numsame > 2) newstate.score += 2;
+
+	newstate.lastpiece = board[p.first][p.second].piece;
+	newstate.lastplace = p;
+
+	newstate.lastfour.push_back(newstate.lastpiece);
+	if (newstate.lastfour.size() > 4) newstate.lastfour.erase(begin(newstate.lastfour));
+	if (newstate.lastfour.size() == 4)
+	{
+		vector<Piece> c = newstate.lastfour;
+		sort(all(c));
+		if (c[0] == k1 && c[1] == k2 && c[2] == k3 && c[3] == k4)
+		{
+			if (newstate.sets.size() && newstate.sets.back() == 0) newstate.sets.resize(0);
+			newstate.sets.push_back(0);
+			if (newstate.sets.size() == 2) newstate.score += 16;
+			else if (newstate.sets.size() > 2) newstate.score += 8;
+
+			vector<Piece>& k = newstate.lastfour;
+			if (k[0] == k1 && k[1] == k2 && k[2] == k3 && k[3] == k4) newstate.score += 12;
+			else if (k[3] == k1 && k[2] == k2 && k[1] == k3 && k[0] == k4) newstate.score += 12;
+			else newstate.score += 8;
+
+			newstate.lastfour.resize(0);
+		}
+		if (c[0] == tower && c[1] == bishop && c[2] == queen && c[3] == horse)
+		{
+			if (newstate.sets.size() && newstate.sets.back() == 1) newstate.sets.resize(0);
+			newstate.sets.push_back(1);
+			if (newstate.sets.size() == 2) newstate.score += 16;
+			else if (newstate.sets.size() > 2) newstate.score += 8;
+
+			newstate.score += 8;
+			newstate.lastfour.resize(0);
+		}
+	}
+
+	states.push(newstate);
+	board[p.first][p.second].tier++;
+	if (fake)
+	{
+		board[p.first][p.second].piece = unknown;
+	}
+	else
+	{
+		Piece newpiece = getnewpiece(p);
+		board[p.first][p.second].piece = newpiece;
+	}
+}
+
+void undofakemove()
+{
+	state laststate = states.top();
+	states.pop();
+
+	p2 p = laststate.lastplace;
+	board[p.first][p.second].tier--;
+	board[p.first][p.second].piece = laststate.lastpiece;
+}
+
+
+vector<p2> offsetsknight = { {1,2},{2,1},{-1,2},{1,-2},{-1,-2},{-2,1},{2,-1},{-2,-1} };
+vector<p2> offsetbishop = { {1,1},{-1,1},{1,-1},{-1,-1} };
+vector<p2> offsets1 = { {0,1},{0,-1},{1,0},{-1,0},{1,1},{1,-1},{-1,1},{-1,-1} };
+vector<p2> offsets2 = { {0,2},{0,-2},{2,0},{-2,0},{2,2},{2,-2},{-2,2},{-2,-2} };
+vector<p2> offsets3 = { {0,3},{0,-3},{3,0},{-3,0},{3,3},{3,-3},{-3,3},{-3,-3} };
+vector<p2> offsets4 = { {0,4},{0,-4},{4,0},{-4,0},{4,4},{4,-4},{-4,4},{-4,-4} };
+vector<p2> getmoves()
+{
+	if (states.size() == 1)
+	{
+		vp2 ret;
+		rep(i, 6) rep(j, 6) ret.push_back(p2(i, j));
+		return ret;
+	}
+	else
+	{
+		vp2 ret;
+		state& laststate = states.top();
+		if ((laststate.lastpiece >= k1 && laststate.lastpiece <= k4) || laststate.lastpiece == horse)
+		{
+			vp2 offsets;
+			if (laststate.lastpiece == k1) offsets = offsets1;
+			if (laststate.lastpiece == k2) offsets = offsets2;
+			if (laststate.lastpiece == k3) offsets = offsets3;
+			if (laststate.lastpiece == k4) offsets = offsets4;
+			if (laststate.lastpiece == horse) offsets = offsetsknight;
+			repe(offset, offsets)
+			{
+				p2 np = offset + laststate.lastplace;
+
+				if (!isinside(np)) continue;
+				if (board[np.first][np.second].piece == none || board[np.first][np.second].piece == unknown) continue;
+				ret.push_back(offset + laststate.lastplace);
+			}
+		}
+		if (laststate.lastpiece == tower || laststate.lastpiece == queen)
+		{
+			p2 p = laststate.lastplace;
+			vp2 ops = { {0,-1}, {5,-1},{-1,0},{-1,5} };
+			repe(op, ops)
+			{
+				p2 np = p;
+				if (op.first != -1) np.first = op.first;
+				if (op.second != -1) np.second = op.second;
+				if (board[np.first][np.second].piece == none || board[np.first][np.second].piece == unknown) continue;
+				ret.push_back(np);
+			}
+		}
+		if (laststate.lastpiece == bishop || laststate.lastpiece == queen)
+		{
+			repe(offset, offsetbishop)
+			{
+				p2 p = laststate.lastplace;
+				while (1)
+				{
+					p2 np = p + offset;
+					if (!isinside(np)) break;
+					p = np;
+				}
+				if (board[p.first][p.second].piece == none || board[p.first][p.second].piece == unknown) continue;
+				ret.push_back(p);
+			}
+		}
+		return ret;
+	}
+}
+
+int recurmove(int d, int o)
+{
+	if (d == 0) return states.top().score + (states.top().sets.size() > o);
+
+	vp2 moves = getmoves();
+
+	int bestscore = -1;
+
+	repe(move, moves)
+	{
+		domove(move, 1);
+		bestscore = max(bestscore, recurmove(d - 1, o));
+		undofakemove();
+	}
+	return bestscore;
+}
+
+void donextmove()
+{
+	vp2 moves = getmoves();
+	if (moves.size())
+	{
+		int bestscore = -inf;
+		p2 bestmove = { -1,-1 };
+		repe(move, moves)
+		{
+			if (move == states.top().lastplace) continue;
+			domove(move, 1);
+			int v = recurmove(4, states.top().sets.size()) - board[move.first][move.second].tier;
+
+			if (v > bestscore)
+			{
+				bestscore = v;
+				bestmove = move;
+			}
+			undofakemove();
+		}
+		if (bestmove.first == -1)
+		{
+			die();
+			repe(move, moves) if (move != states.top().lastplace) bestmove = move;
+			//assert(moves.size() == 1);
+		}
+
+		domove(bestmove);
+	}
+	else
+	{
+		die();
+	}
+}
 
 int32_t main()
 {
 	fast();
 
-	dread(int, n);
-	readvector(int, heights, n);
-	rep(i, n) heights[i]--;
-	vi pos(n);
-	rep(i, n) pos[heights[i]] = i;
+	piecemap["1"] = k1;
+	piecemap["2"] = k2;
+	piecemap["3"] = k3;
+	piecemap["4"] = k4;
+	piecemap["torn"] = tower;
+	piecemap["lopare"] = bishop;
+	piecemap["dam"] = queen;
+	piecemap["springare"] = horse;
+	states.push(state());
 
-	tin.resize(n);
-	tout.resize(n);
-	depth.resize(n);
+	board.resize(6, vector<cell>(6));
+	rep(i, 6) rep(j, 6) board[i][j].tier = 0;
 
-	edges.resize(n);
-	vvp2 par(n);
-	rep(i, n - 1)
+#if !_LOCAL
+	rep(i, 6)
 	{
-		dread2(int, a, b);
-		a--; b--;
-		edges[a].push_back(b);
-		edges[b].push_back(a);
-	}
-
-	dfs(0, 0, 0, edges);
-
-	UF uf(n);
-	int b = 0;
-	rep(i, n)
-	{
-		int u = pos[i];
-		int k = 0;
-		repe(e, edges[u])
+		rep(j, 6)
 		{
-			if (heights[e] >= heights[u]) continue;
-			int o = uf.find(e);
-			int d = uf.dp[o].first + dist(uf.dp[o].second, u, -1);
-			k = max(k, d);
-			uf.add(e, u);
+			dread(string, s);
+			board[i][j].piece = piecemap[s];
 		}
-		b = max(b, k);
-		uf.dp[uf.find(u)] = { k,u };
 	}
+#else
+	vector<Piece> options = { k1,k2,k3,k4,tower,horse,bishop,queen };
 
+	rep(i, 6)
+	{
+		rep(j, 6)
+		{
+			board[i][j].piece = randel(options);
+		}
+	}
+#endif
 
-
-	cout << b;
+	while (true)
+	{
+		donextmove();
+	}
 
 	quit;
 }
