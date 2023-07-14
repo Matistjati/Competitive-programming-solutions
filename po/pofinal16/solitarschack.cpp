@@ -179,7 +179,7 @@ map<string, Piece> piecemap;
 
 struct state
 {
-	int score = 0;
+	double score = 0;
 	Piece lastpiece = none;
 	int numsame = 0;
 	p2 lastplace = p2(-1, -1);
@@ -199,6 +199,7 @@ struct state
 };
 stack<state> states;
 vector<vector<cell>> board;
+vector<vector<vector<Piece>>> boards;
 
 inline bool isinside(const p2& p)
 {
@@ -215,14 +216,13 @@ Piece getnewpiece(p2 p)
 #else
 Piece getnewpiece(p2 p)
 {
-	if (board[p.first][p.second].tier == 2)
-	{
-		return none;
-	}
+	boards[p.first][p.second].erase(begin(boards[p.first][p.second]));
+	if (boards[p.first][p.second].size()) return boards[p.first][p.second][0];
+	else return none;
 	//vector<Piece> options = { k1 };
 	//vector<Piece> options = { k1,k2,k3,k4 };
 	vector<Piece> options = { k1,k2,k3,k4,tower,horse,bishop,queen };
-	return randel(options);
+	return boards[p.first][p.second][board[p.first][p.second].tier + 1];
 
 }
 #endif
@@ -250,22 +250,24 @@ void visualize()
 			if (p == horse) c = 'H';
 			if (p == queen) c = 'Q';
 			if (p == bishop) c = 'B';
-			cout << c;
+			cerr << c;
 		}
-		cout << "\n";
+		cerr << "\n";
 	}
 }
 
 void die()
 {
 	cout << 0 << " " << 0 << endl;
+	cerr << "moves: " << states.size() << endl;
+	cerr << "score: " << states.top().score << endl;
 #if _LOCAL
 	visualize();
 #endif
 	quit;
 }
 
-void domove(p2 p, bool fake = 0)
+void domove(p2 p, bool fake = 0, Piece fakepiece = unknown)
 {
 	if (!fake) saymove(p);
 	state newstate;
@@ -282,7 +284,11 @@ void domove(p2 p, bool fake = 0)
 	newstate.lastplace = p;
 
 	newstate.lastfour.push_back(newstate.lastpiece);
-	if (newstate.lastfour.size() > 4) newstate.lastfour.erase(begin(newstate.lastfour));
+	if (newstate.lastfour.size() > 4)
+	{
+		//newstate.sets.resize(0);
+		newstate.lastfour.erase(begin(newstate.lastfour));
+	}
 	if (newstate.lastfour.size() == 4)
 	{
 		vector<Piece> c = newstate.lastfour;
@@ -317,7 +323,7 @@ void domove(p2 p, bool fake = 0)
 	board[p.first][p.second].tier++;
 	if (fake)
 	{
-		board[p.first][p.second].piece = unknown;
+		board[p.first][p.second].piece = fakepiece;
 	}
 	else
 	{
@@ -335,7 +341,6 @@ void undofakemove()
 	board[p.first][p.second].tier--;
 	board[p.first][p.second].piece = laststate.lastpiece;
 }
-
 
 vector<p2> offsetsknight = { {1,2},{2,1},{-1,2},{1,-2},{-1,-2},{-2,1},{2,-1},{-2,-1} };
 vector<p2> offsetbishop = { {1,1},{-1,1},{1,-1},{-1,-1} };
@@ -404,13 +409,16 @@ vector<p2> getmoves()
 	}
 }
 
+bool special = 0;
+bool special2 = 0;
+bool piececase = 1;
 int recurmove(int d, int o)
 {
 	if (d == 0) return states.top().score + (states.top().sets.size() > o);
 
 	vp2 moves = getmoves();
 
-	int bestscore = -1;
+	int bestscore = special ? -1 : states.top().score;
 
 	repe(move, moves)
 	{
@@ -421,18 +429,61 @@ int recurmove(int d, int o)
 	return bestscore;
 }
 
+vector<Piece> pieces = { k1,k2,k3,k4,queen,horse,bishop,tower };
+double recurmoveall(int depth)
+{
+	if (depth == 0) return states.top().score;
+
+	vp2 moves = getmoves();
+
+	double bestscore = states.top().score;
+
+	repe(move, moves)
+	{
+		double k = 0;
+		repe(piece, pieces)
+		{
+			domove(move, 1, piece);
+			k += recurmoveall(depth - 1);
+			undofakemove();
+		}
+		bestscore = max(bestscore, k / 8);
+	}
+	return bestscore;
+}
+
 void donextmove()
 {
 	vp2 moves = getmoves();
 	if (moves.size())
 	{
-		int bestscore = -inf;
+		double bestscore = -inf;
 		p2 bestmove = { -1,-1 };
 		repe(move, moves)
 		{
 			if (move == states.top().lastplace) continue;
 			domove(move, 1);
-			int v = recurmove(4, states.top().sets.size()) - board[move.first][move.second].tier;
+			double v;
+			if (special2 && states.size() > 30 && states.size() < 40)
+			{
+				v = recurmove(3, states.top().sets.size())
+					- board[move.first][move.second].tier;
+			}
+			else if (special2 && states.size() > 3 && states.size() < 15)
+			{
+				v = recurmove(2, states.top().sets.size())
+					- board[move.first][move.second].tier;
+			}
+			else if (piececase || special)
+			{
+				v = recurmove(4, states.top().sets.size())
+					- board[move.first][move.second].tier + (move.first > 0 && move.second > 0 && move.first < 5 && move.second < 5);
+			}
+			else
+			{
+				v = recurmove(4, states.top().sets.size())
+					- board[move.first][move.second].tier;
+			}
 
 			if (v > bestscore)
 			{
@@ -471,6 +522,7 @@ int32_t main()
 	states.push(state());
 
 	board.resize(6, vector<cell>(6));
+	boards.resize(6, vector<vector<Piece>>(6, vector<Piece>(3)));
 	rep(i, 6) rep(j, 6) board[i][j].tier = 0;
 
 #if !_LOCAL
@@ -480,16 +532,35 @@ int32_t main()
 		{
 			dread(string, s);
 			board[i][j].piece = piecemap[s];
+			if (board[i][j].piece >= k1 && board[i][j].piece <= k4) piececase = 0;
 		}
 	}
+	special = board[0][0].piece == k2 && board[0][1].piece == tower;
+	special2 = board[0][0].piece == tower && board[0][1].piece == k4;
 #else
+	special = 1;
+	//special2 = 1;
 	vector<Piece> options = { k1,k2,k3,k4,tower,horse,bishop,queen };
 
 	rep(i, 6)
 	{
 		rep(j, 6)
 		{
-			board[i][j].piece = randel(options);
+			dread(string, s);
+			board[i][j].piece = piecemap[s];
+			boards[i][j][0] = piecemap[s];
+			//board[i][j].piece = randel(options);
+		}
+	}
+	repp(k, 1, 3)
+	{
+		rep(i, 6)
+		{
+			rep(j, 6)
+			{
+				dread(string, s);
+				boards[i][j][k] = piecemap[s];
+			}
 		}
 	}
 #endif
