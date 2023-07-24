@@ -64,8 +64,8 @@ template<typename T> using indexed_multiset = tree<int, null_type, less_equal<T>
 template<typename T> using indexed_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 template<typename T, typename U> using indexed_set = tree<T, U, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
 struct chash { // large odd number for C
-	const uint64_t C = ll(4e18 * acos(0)) | 71;
-	ll operator()(ll x) const { return __builtin_bswap64(x * C); }
+    const uint64_t C = ll(4e18 * acos(0)) | 71;
+    ll operator()(ll x) const { return __builtin_bswap64(x * C); }
 };
 
 template<typename T, typename U> using fast_map = __gnu_pbds::gp_hash_table<T, U, chash>;
@@ -157,9 +157,116 @@ template<typename T> inline T randel(vector<T>& v) { return v[uniform_int_distri
 const ll mod = 1e9 + 7;
 vp2 dirs = { {0,1},{0,-1},{1,0},{-1,0}, {0,0} };
 
+vvi edges;
+vi tin;
+vi tout;
+vi depth;
+int up[int(2e5) + 10][19];
+int timer = 0;
+
+void dfs(int u, int p, int d, vvi& edges)
+{
+    depth[u] = d;
+    tin[u] = timer++;
+    up[u][0] = p;
+    repp(d, 1, 19)
+    {
+        up[u][d] = up[up[u][d - 1]][d - 1];
+    }
+
+    repe(e, edges[u]) if (e != p) dfs(e, u, d + 1, edges);
+
+    tout[u] = timer++;
+}
+
+int isancestor(int a, int b)
+{
+    return tin[a] <= tin[b] && tout[a] >= tout[b];
+}
+
+int dist(int a, int b, int p)
+{
+    if (isancestor(a, b)) return depth[b] - depth[a];
+    if (isancestor(b, a)) return depth[a] - depth[b];
+
+    int lc = a;
+    per(d, 19)
+    {
+        if (!isancestor(up[lc][d], b))
+        {
+            lc = up[lc][d];
+        }
+    }
+    return depth[a] + depth[b] - 2 * depth[up[lc][0]];
+}
+
+struct UF
+{
+    vi par;
+    vp2 dp;
+
+    UF(int n) : par(n), dp(n, p2(-inf, inf))
+    {
+        rep(i, n) par[i] = i;
+    }
+
+    int find(int x) { return x == par[x] ? x : par[x] = find(par[x]); }
+
+    void add(int a, int b)
+    {
+        a = find(a);
+        b = find(b);
+        par[b] = a;
+    }
+};
+
 int32_t main()
 {
-	fast();
+    fast();
 
-	quit;
+    dread(int, n);
+    readvector(int, heights, n);
+    rep(i, n) heights[i]--;
+    vi pos(n);
+    rep(i, n) pos[heights[i]] = i;
+
+    tin.resize(n);
+    tout.resize(n);
+    depth.resize(n);
+
+    edges.resize(n);
+    vvp2 par(n);
+    rep(i, n - 1)
+    {
+        dread2(int, a, b);
+        a--; b--;
+        edges[a].push_back(b);
+        edges[b].push_back(a);
+    }
+
+    dfs(0, 0, 0, edges);
+
+    UF uf(n);
+    int b = 0;
+    rep(i, n)
+    {
+        int u = pos[i];
+        int k = 0;
+        repe(e, edges[u])
+        {
+            if (heights[e] >= heights[u]) continue;
+            int o = uf.find(e);
+            int d = uf.dp[o].first + dist(uf.dp[o].second, u, -1);
+            k = max(k, d);
+            uf.add(e, u);
+        }
+        b = max(b, k);
+        uf.dp[uf.find(u)] = { k,u };
+    }
+
+
+
+    cout << b;
+
+    quit;
 }
