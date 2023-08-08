@@ -102,53 +102,41 @@ int32_t main()
 #endif
 
     int n = readint();
-    vector<int> meals(n);
-    vector<int> prefixMeals(n);
-    int s = 0;
+
+    vector<tuple<int, int, int>> people(n);
     rep(i, n)
     {
-        int happiness = readintsigned();
-        s += happiness;
-        prefixMeals[i] = s;
-        meals[i] = happiness;
+        int born = readint();
+        int death = readint();
+
+        people[i] = { born,death, i };
     }
 
-    int ans = -inf;
+    sort(all(people));
+    vector<int> n_speeches(n);
 
-    ans = max(ans, meals[0]);
-    ans = max(ans, meals[n - 1]);
 
-    vector<int> upqueries(n);
-    int biggest = -inf;
-    per(i, n)
+    p3 prevOldest = { 0,0,-1 };
+    ll currOldest = 0;
+    rep(i, n)
     {
-        biggest = max(biggest, prefixMeals[i]);
-        upqueries[i] = biggest - prefixMeals[i];
-    }
+        int born, death, index;
+        tie(born, death, index) = people[i];
 
-
-    vector<int> downqueries(n);
-    int smallest = 0;
-    for (int i = 0; i < n - 1; i++)
-    {
-        smallest = min(smallest, prefixMeals[i]);
-
-        if (i > 0)
+        currOldest = max(currOldest, (ll)death);
+        if (death > get<1>(prevOldest))
         {
-            downqueries[i] = prefixMeals[i - 1] - smallest;
+            n_speeches[index] += min((ll)death - get<1>(prevOldest), (ll)death - born);
+            prevOldest = people[i];
         }
 
+
     }
 
-
-    for (int i = 1; i < n - 1; i++)
+    rep(i, n)
     {
-        int start = meals[i];
-        int maxGuaranteed = min(downqueries[i], upqueries[i]);
-        ans = max(ans, start + maxGuaranteed);
+        write(n_speeches[i]);
     }
-
-    write(ans);
 
 
     quit;
