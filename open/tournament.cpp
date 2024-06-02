@@ -23,37 +23,6 @@ inline void fast() { ios::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL);
 #define assert(x) if (!(x)) __debugbreak()
 #endif
 
-int sqr(int x)
-{
-	return x * x;
-}
-
-int memo[100][100][100];
-int iglimit;
-int best_(int i, int prev, int ignored, vector<pair<int, string>>& s)
-{
-	if (ignored > iglimit)
-	{
-		return inf;
-	}
-	if (i == sz(s))
-	{
-		return (prev == -1 && ignored == iglimit) ? 0 : inf;
-	}
-	int& v = memo[i][prev + 1][ignored];
-	if (v != -1) return v;
-	int ret = best_(i + 1, prev, ignored + 1, s);
-	if (prev == -1)
-	{
-		ret = min(ret, best_(i + 1, i, ignored, s));
-	}
-	else
-	{
-		ret = min(ret, sqr(s[prev].first - s[i].first) + best_(i + 1, -1, ignored, s));
-	}
-	return v = ret;
-}
-
 struct pos
 {
 	int i, taken;
@@ -76,6 +45,7 @@ signed main()
 	//ifstream in("c:\\users\\matis\\desktop\\comp_prog\\x64\\debug\\in.txt");
 	//cin.rdbuf(in.rdbuf());
 
+	ofstream out;
 	int n;
 	while (cin >> n && n != 0)
 	{
@@ -104,7 +74,6 @@ signed main()
 				}
 			}
 		}
-		iglimit = p;
 
 		vector<pair<double, string>> cc(contestants);
 		reverse(all(cc));
@@ -114,38 +83,38 @@ signed main()
 		cc.insert(cc.begin(), { 0, "LIGMA" });
 		cc.push_back({ 0, "LIGMA" });
 		pos defaultpos = pos({ -1,-1 });
-		
 
-		
+
+
 		line nullline = line({ 0,inf,0,defaultpos });
-		auto add = [](deque<line>& cht, line l)
+		int backind = 0;
+		vector<line> dplines(n+2);
+		auto add = [&backind](vector<line>& cht, line l)
 		{
-			while (sz(cht) > 1 && cht.back().isect(l) < cht[sz(cht) - 2].isect(l))
+			while (backind > 0 && cht[backind].isect(l) < cht[backind - 1].isect(l))
 			{
-				cht.pop_back();
+				backind--;
 			}
-			cht.push_back(l);
+			cht[++backind] = l;
 		};
-		auto query = [nullline](deque<line>& cht, int x)
+		auto query = [&backind, nullline](vector<line>& cht, int x)
 		{
-			if (sz(cht) == 0) return nullline;
-			while (sz(cht) > 1 && cht.back().eval(x) > cht[sz(cht) - 2].eval(x))
+			if (backind == -1) return nullline;
+			while (backind > 0 && cht[backind].eval(x) > cht[backind].eval(x))
 			{
-				cht.pop_front();
+				backind--;
 			}
-			return cht.back();
+			return cht[backind];
 		};
 
 		typedef pair<double, int> dpval;
 		vector<pos> dpfreepos(n + 2, defaultpos);
 		vector<pos> dptakenpos(n + 2, defaultpos);
-		vector<dpval> dpfree(n + 2, dpval(inf, inf));
 
 		// O(klog(?)) for each testcase, using alien dp + convex hull trick
 		auto alien = [&](double lambda)
 		{
-			rep(i, n + 2) dpfree[i] = dpval(inf, inf);
-			deque<line> dplines;
+			backind = -1;
 			dpval smol = dpval(0, 0);
 			pos smolpos = pos(0, 1);
 			repp(i, 1, n + 2)
@@ -156,46 +125,46 @@ signed main()
 				v -= lambda;
 				dptakenpos[i] = best.from;
 
-				dpfree[i] = smol;
 				dpfreepos[i] = smolpos;
-				line dpline(- 2 * cc[i].first, dpfree[i].first+ cc[i].first * cc[i].first, dpfree[i].second, pos({i, 0}));
+				line dpline(-2 * cc[i].first, smol.first + cc[i].first * cc[i].first, smol.second, pos({ i, 0 }));
 				add(dplines, dpline);
-				
-				if (v < smol.first) smol = dpval(v, best.placements + 1), smolpos = pos(i, 1);
-				
+
+				if (i != n + 1 && v < smol.first) smol = dpval(v, best.placements + 1), smolpos = pos(i, 1);
+
 			}
-			return dpfree.back();
+			return smol;
 		};
-		double lo = -int(1e9);
-		double hi = int(1e9);
-		rep(i, 100)
+		double lo = 0;
+		double hi = int(1e8);
+		rep(i, 58)
 		{
 			double mid = (lo + hi) / 2;
-			if (alien(mid).second >= (n - p)/2)
+			if (alien(mid).second >= (n - p) / 2)
 			{
 				hi = mid;
 			}
 			else lo = mid;
 		}
 		dpval res = alien(hi);
-		assert(res.second == (n - p)/2);
+		assert(res.second == (n - p) / 2);
 		// lowest total cost of remaining knights
 		//cout << int(round(alien(hi).first + (n - p)/2 * hi)) << "\n";
-		
-		set<string> used;
+
+		vi used(n+2);
 		pos cp = dpfreepos.back();
 		while (cp.i != -1)
 		{
-			used.insert(cc[cp.i].second);
+			used[cp.i]=1;
 			if (cp.taken) cp = dptakenpos[cp.i];
 			else cp = dpfreepos[cp.i];
 		}
+		used.back() = 1;
 
-		set<string> unused;
-		repe(c, contestants) if (used.find(c.second) == used.end()) unused.insert(c.second);
-		cout << sz(unused) << "\n";
-		repe(c, unused) cout << c << "\n";
-		
+		int cnt = 0;
+		rep(i, n + 2) if (!used[i]) cnt++;
+		cout << cnt << "\n";
+		rep(i, n + 2) if(!used[i]) cout << cc[i].second << "\n";
+
 	}
 
 	return 0;
