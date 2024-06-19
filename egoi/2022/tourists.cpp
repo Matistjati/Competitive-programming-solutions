@@ -8,7 +8,6 @@
 #pragma GCC target("avx,avx2,f16c,fma,sse3,ssse3,sse4.1,sse4.2") // SIMD
 
 #include <bits/stdc++.h>
-#include <bits/extc++.h>
 using namespace std;
 
 #define enablell 1
@@ -56,21 +55,6 @@ uint32_t clz(uint32_t x) { return __builtin_clz(x); }
 uint32_t ctz(uint32_t x) { return __builtin_ctzll(x); }
 #define bswap64(x) __builtin_bswap64(x)
 #define gc() getchar_unlocked()
-#if PBDS
-using namespace __gnu_pbds;
-// lower_bound is now upper_bound and vice versa (multiset). generally a bit broken
-template<typename T> using indexed_multiset = tree<int, null_type, less_equal<T>, rb_tree_tag, tree_order_statistics_node_update>;
-template<typename T> using indexed_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
-struct chash { // large odd number for C
-    const uint64_t C = ll(4e18 * acos(0)) | 71;
-    ll operator()(ll x) const { return __builtin_bswap64(x * C); }
-};
-
-template<typename T, typename U> using fast_map = __gnu_pbds::gp_hash_table<T, U, chash>;
-template<typename T> using fast_set = __gnu_pbds::gp_hash_table<T, null_type, chash>;
-template<typename T, typename H> using fast_set_h = __gnu_pbds::gp_hash_table<T, null_type, H>;
-#endif
-
 #endif
 
 #define FAST_INPUT 0
@@ -217,13 +201,6 @@ struct Tree
 
     Tree(int n) : color(n * 4 + 10, 0), lazy(n * 4 + 10, 0), n(n), lazycolor(n * 4 + 10, -10), islazy(n * 4 + 10) {}
 
-    /*void push(int x)
-    {
-        tree[x*2]
-    }*/
-
-
-
     void paint(int x, int l, int r, int ql, int qr, int col)
     {
         if (r < ql || l > qr) return;
@@ -303,19 +280,12 @@ struct Tree
 
 string solvesmart(int n, int m, int q, vi& cityin, vp2& ein, vvi& queries)
 {
-    city.resize(0);
     city.resize(m);
-    edges.resize(0);
     edges.resize(n);
-    par.resize(0);
     par.resize(n);
-    depth.resize(0);
     depth.resize(n);
-    timein.resize(0);
     timein.resize(n);
-    timeout.resize(0);
     timeout.resize(n);
-    cost.resize(0);
     cost.resize(m);
 
     rep(i, 200010) rep(j, 19) up[i][j] = -1;
@@ -373,80 +343,6 @@ string solvesmart(int n, int m, int q, vi& cityin, vp2& ein, vvi& queries)
     return ret.str();
 }
 
-string solvestupid(int n, int m, int q, vi& cityin, vp2& ein, vvi& queries)
-{
-    city.resize(0);
-    city.resize(m);
-    edges.resize(0);
-    edges.resize(n);
-    par.resize(0);
-    par.resize(n);
-    depth.resize(0);
-    depth.resize(n);
-    timein.resize(0);
-    timein.resize(n);
-    timeout.resize(0);
-    timeout.resize(n);
-    cost.resize(0);
-    cost.resize(m);
-    rep(i, 200010) rep(j, 19) up[i][j] = -1;
-    rep(i, m)
-    {
-        city[i] = cityin[i];
-        city[i]--;
-    }
-
-    rep(i, n - 1)
-    {
-        int a = ein[i].first;
-        int b = ein[i].second;
-        a--; b--;
-        edges[a].push_back(b);
-        edges[b].push_back(a);
-    }
-
-    int time = 0;
-    roottree(0, 0, 0, time);
-
-
-    stringstream ret;
-    rep(_, q)
-    {
-        int t = queries[_][0];
-        if (t == 0)
-        {
-            int l = queries[_][1];
-            int r = queries[_][2];
-            int c = queries[_][3];
-            l--; r--; c--;
-
-            repp(i, l, r + 1)
-            {
-                int p = city[i];
-                cost[i] -= dist(p, c);
-                city[i] = c;
-            }
-        }
-        if (t == 1)
-        {
-            int c = queries[_][1];
-            c--;
-            int d = queries[_][2];
-            rep(i, m)
-            {
-                if (city[i] == c) cost[i] += d;
-            }
-        }
-        if (t == 2)
-        {
-            int v = queries[_][1];
-            v--;
-            ret << cost[v] << "\n";
-        }
-    }
-    return ret.str();
-}
-
 
 struct UF
 {
@@ -469,7 +365,6 @@ int32_t main()
     fast();
 
 
-#if 0
     dread3(int, n, m, q);
     readvector(int, cit, m);
     vp2 e(n - 1);
@@ -494,84 +389,7 @@ int32_t main()
             queries[i] = { 2, v };
         }
     }
-    //cout << solvestupid(n, m, q, cit, e, queries);
     cout << solvesmart(n, m, q, cit, e, queries);
 
-#else
-    rep(i, 10000)
-    {
-        int n = randint(1, 4);
-        int m = randint(1, 4);
-        int q = randint(1, 4);
-        vi city(m);
-        rep(i, m) city[i] = randint(1LL, n);
-
-        vp2 edges;
-        UF uf(n);
-        while (edges.size() < n - 1)
-        {
-            int a = randint(0LL, n - 1);
-            int b = randint(0LL, n - 1);
-
-            if (uf.find(a) != uf.find(b))
-            {
-                uf.merge(a, b);
-                edges.emplace_back(a, b);
-            }
-        }
-        rep(i, n - 1) edges[i].first++, edges[i].second++;
-
-        vvi queries(q);
-        rep(i, q)
-        {
-            if (randint(0, 1) == 1)
-            {
-                int l = randint(1LL, m);
-                int r = randint(l, m);
-
-                queries[i] = { 0,l, r, randint(1LL, n) };
-            }
-            else if (randint(0, 1) == 1)
-            {
-
-                queries[i] = { 1, randint(1LL, n), 1 };
-            }
-            else
-            {
-                queries[i] = { 2, randint(1LL, m) };
-            }
-        }
-
-        string smart = solvesmart(n, m, q, city, edges, queries);
-        string stupid = solvestupid(n, m, q, city, edges, queries);
-        if (smart != stupid)
-        {
-            deb;
-            cout << n << " " << m << " " << q << "\n";
-
-            rep(i, m) cout << city[i] << " ";
-            cout << "\n";
-            rep(i, n - 1)
-            {
-                cout << edges[i].first << " " << edges[i].second << "\n";
-            }
-            rep(i, q)
-            {
-                if (queries[i][0] == 0)
-                {
-                    cout << "t ";
-                    repp(j, 1, 4) cout << queries[i][j] << " ";
-                    cout << "\n";
-                }
-                else
-                {
-                    cout << "q ";
-                    cout << queries[i][1] << "\n";
-                }
-            }
-            return 0;
-        }
-    }
-#endif
     quit;
 }
