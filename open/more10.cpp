@@ -28,9 +28,9 @@ struct UF
 	vi par;
 	vi size;
 	int p;
-	UF(int n) : par(n + buffer), size(n + buffer, 1), p(n)
+	UF(int n) : par(n+buffer), size(n+buffer, 1), p(n)
 	{
-		rep(i, n + buffer)par[i] = i;
+		rep(i, n+buffer)par[i] = i;
 	}
 	int addnode() { return p++; }
 	int find(int x) { return x == par[x] ? x : par[x] = find(par[x]); }
@@ -61,8 +61,8 @@ struct Node
 			return;
 		}
 		if (ind == 3) return;
-		if (children[s[ind] - 'a'] == nullptr) children[s[ind] - 'a'] = new Node();
-		children[s[ind] - 'a']->insert(s, ind + 1, whoami);
+		if (children[s[ind]-'a'] == nullptr) children[s[ind]-'a'] = new Node();
+		children[s[ind]-'a']->insert(s, ind + 1, whoami);
 	}
 
 	void addedges(UF& uf, string& s, int par, int ind)
@@ -75,9 +75,10 @@ struct Node
 		}
 		if (par == -1 && isterminal != -1) par = isterminal;
 		if (par != -1) uf.merge(par, nameind[s]);
-		if (children[s[ind] - 'a'] != nullptr) children[s[ind] - 'a']->addedges(uf, s, par, ind + 1);
+		if (children[s[ind]-'a']!=nullptr) children[s[ind] - 'a']->addedges(uf, s, par, ind + 1);
 	}
 };
+//Node* nodes[int()];
 
 signed main()
 {
@@ -88,8 +89,8 @@ signed main()
 
 	int n;
 	cin >> n;
-
-	UF uf(n * 2);
+	
+	UF uf(n*2);
 	vector<p2> neg;
 	Node* root = new Node();
 	vector<string> words;
@@ -105,7 +106,7 @@ signed main()
 		root->insert(b, 0, nameind[b]);
 		words.emplace_back(a);
 		words.emplace_back(b);
-		if (_ == "is")
+		if (_=="is")
 		{
 			uf.merge(nameind[a], nameind[b]);
 		}
@@ -119,6 +120,6 @@ signed main()
 	bool consistent = 1;
 	repe(no, neg) consistent &= uf.find(no.first) != uf.find(no.second);
 	cout << (consistent ? "yes" : "wait what?");
-
+	
 	return 0;
 }
