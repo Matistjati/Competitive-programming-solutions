@@ -1,339 +1,160 @@
-// NOTE: Gets 47 points
-
-#undef _GLIBCXX_DEBUG                // disable run-time bound checking, etc
-#pragma GCC optimize("Ofast,inline") // Ofast = O3,fast-math,allow-store-data-races,no-protect-parens
-#pragma GCC optimize ("unroll-loops")
-
-#pragma GCC target("bmi,bmi2,lzcnt,popcnt")                      // bit manipulation
-#pragma GCC target("movbe")                                      // byte swap
-#pragma GCC target("aes,pclmul,rdrnd")                           // encryption
-#pragma GCC target("avx,avx2,f16c,fma,sse3,ssse3,sse4.1,sse4.2") // SIMD
-
 #include <bits/stdc++.h>
-#include <bits/extc++.h>
 using namespace std;
 
-#define enablell 1
-
 typedef long long ll;
-typedef unsigned long long ull;
-#if enablell
 #define int ll
-#define inf int(1e18)
-#define float double
-#else
-const int inf = int(2e9);
-#endif
+const int inf = int(1e18);
+
 typedef vector<int> vi;
 typedef vector<vi> vvi;
-typedef vector<vvi> vvvi;
-typedef vector<vvvi> vvvvi;
-typedef vector<bool> vb;
-typedef vector<vb> vvb;
-typedef vector<vvb> vvvb;
 typedef pair<int, int> p2;
-typedef vector<p2> vp2;
-typedef vector<vp2> vvp2;
-typedef vector<vvp2> vvvp2;
-typedef tuple<int, int, int> p3;
-typedef vector<p3> vp3;
-typedef vector<vp3> vvp3;
-typedef vector<vvp3> vvvp3;
-typedef tuple<int, int, int, int> p4;
-typedef vector<p4> vp4;
-
-#define PBDS 0
-#define _LOCAL _MSC_VER > 0
-#if _LOCAL
-#define gc() getchar()
-#define popcount(x) __popcnt(x)
-#define leading_zeros(x) _lzcnt_u32(x)
-uint32_t clz(uint32_t x) { return _lzcnt_u32(x); }
-uint32_t ctz(uint32_t x) { return _tzcnt_u32(x); }
-#define bswap64(x) _byteswap_uint64(x)
-#define assert(x) debassert(x)
-#else
-#define popcount(x) __builtin_popcount(x)
-uint32_t clz(uint32_t x) { return __builtin_clz(x); }
-uint32_t ctz(uint32_t x) { return __builtin_ctzll(x); }
-#define bswap64(x) __builtin_bswap64(x)
-#define gc() getchar_unlocked()
-#if PBDS
-using namespace __gnu_pbds;
-// lower_bound is now upper_bound and vice versa (multiset). generally a bit broken
-template<typename T> using indexed_multiset = tree<int, null_type, less_equal<T>, rb_tree_tag, tree_order_statistics_node_update>;
-template<typename T> using indexed_set = tree<T, null_type, less<T>, rb_tree_tag, tree_order_statistics_node_update>;
-struct chash { // large odd number for C
-    const uint64_t C = ll(4e18 * acos(0)) | 71;
-    ll operator()(ll x) const { return __builtin_bswap64(x * C); }
-};
-
-template<typename T, typename U> using fast_map = __gnu_pbds::gp_hash_table<T, U, chash>;
-template<typename T> using fast_set = __gnu_pbds::gp_hash_table<T, null_type, chash>;
-template<typename T, typename H> using fast_set_h = __gnu_pbds::gp_hash_table<T, null_type, H>;
-#endif
-
-#endif
-
-#define FAST_INPUT 0
-#define FILE_TC 0
-#if FILE_TC && _LOCAL
-//ifstream filein("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
-ifstream filein("E:\\downloads\\test_data\\test_data\\005-case05.in");
-//ifstream filein("E:\\desktop\\po-repos\\swedish-olympiad-2023\\online\\tomtplanering\\data\\secret\\group10\\010-case10.in");
-
-#define cin filein
-//ifstream cin("C:\\Users\\Matis\\desktop\\po-two\\swedish-olympiad-2014\\");
-void fast() {}
-#else
-inline void fast() { ios::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL); }
-#endif
-
-#if FAST_INPUT && !FILE_TC
-inline void read(int& v) { v = 0; int sign = 1; char c = gc(); if (c == '-') { sign = -1; } else { v += c - '0'; } while ((c = gc()) != EOF && c != ' ' && c != '\n') { v *= 10; v += c - '0'; } v *= sign; }
-inline void read(int& u, int& v) { read(u); read(v); }
-inline void read(int& u, int& v, int& k) { read(u); read(v); read(k); }
-//inline void read(int& v) { char c; while ((c = getchar()) != EOF && c != ' ' && c != '\n') { v *= 10; v += c - '0'; } }
-inline void read(string& s) { char c; while ((c = gc()) != EOF && c != '\n' && c != ' ') { s.push_back(c); } }
-#else
-template <typename T> inline void read(T& a) { cin >> a; }
-template <typename T> inline void read(T& a, T& b) { cin >> a >> b; }
-template <typename T> inline void read(T& a, T& b, T& c) { cin >> a >> b >> c; }
-#endif
-template <typename T> inline void write(T a) { cout << (a) << "\n"; }
-#define quit cout << endl; _Exit(0);
-#define dread(type, a) type a; read(a)
-#define dread2(type, a, b) dread(type, a); dread(type, b)
-#define dread3(type, a, b, c) dread2(type, a, b); dread(type, c)
-#define dread4(type, a, b, c, d) dread3(type, a, b, c); dread(type, d)
-#define dread5(type, a, b, c, d, e) dread4(type, a, b, c, d); dread(type, e)
-#define readvector(type, name, size) vector<type> name(size); rep(i,size) {dread(type,temp); name[i]=temp;}
-#ifdef _DEBUG
-#define noop cout << "";
-#define deb __debugbreak();
-#define debassert(expr) if (!(expr)) deb;
-#define debif(expr) if(expr) deb;
-#else
-#define noop ;
-#define deb ;
-#define debassert(expr) ;
-#define debif(expr) ;
-#endif
 
 #define rep(i, high) for (int i = 0; i < high; i++)
 #define repp(i, low, high) for (int i = low; i < high; i++)
 #define repe(i, container) for (auto& i : container)
-#define per(i, high) for (int i = high-1; i >= 0; i--)
-#define perr(i, low, high) for (int i = high-1; i >= low; i--)
-
-#define all(a) a.begin(),a.end()
-#define rall(a) a.rbegin(),a.rend()
-#define setcontains(set, x) (set.find(x) != set.end())
-#define within(a, b, c, d) (a >= 0 && a < b && c >= 0 && c < d)
 #define sz(container) ((int)container.size())
-#define mp(a,b) (make_pair(a,b))
+#define all(x) begin(x),end(x)
+#define ceildiv(x,y) (((x) + (y) - 1) / (y))
 
-#define ceildiv(x,y) ((x + y - 1) / y)
+inline void fast() { ios::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL); }
 
-template<typename T> inline void eraseOne(multiset<T>& mSet, T k) { auto itr = mSet.find(k); if (itr != mSet.end()) { mSet.erase(itr); } }
-template<typename T, typename U> inline T first(U& a) { return *begin(a); }
-template <typename T, typename U> inline void operator+=(pair<T, U>& l, const pair<T, U>& r) { l = { l.first + r.first,l.second + r.second }; }
-template <typename T, typename U> inline pair<T, U> operator+(const pair<T, U> l, const pair<T, U> r) { return { l.first + r.first, l.second + r.second }; }
-template <typename T, typename U> inline pair<T, U> operator-(const pair<T, U> l, const pair<T, U> r) { return { l.first - r.first, l.second - r.second }; }
-template <typename T, typename U> inline pair<T, U> operator*(const pair<T, U> l, const int m) { return { l.first * m, l.second * m }; }
-template <typename Out> inline void split(const string& s, char delim, Out result) { istringstream iss(s); string item; while (getline(iss, item, delim)) { *result++ = item; } }
-inline vector<string> split(const string& s, char delim) { vector<string> elems; split(s, delim, back_inserter(elems)); return elems; }
-vector<string> split(string s, string d) { size_t k = 0, n, e = d.length(); string t; vector<string> r; while ((n = s.find(d, k)) != string::npos) { t = s.substr(k, n - k); k = n + e; r.push_back(t); } r.push_back(s.substr(k)); return r; }
-ll binpow(ll a, ll b) { ll res = 1; while (b > 0) { if (b & 1) res = res * a; a = a * a; b >>= 1; } return res; }
-ll binpow(ll a, ll b, ll m) { a %= m; long long res = 1; while (b > 0) { if (b & 1) res = res * a % m; a = a * a % m; b >>= 1; } return res; } // For a < 2^31
-
-#if 1
-auto Start = chrono::high_resolution_clock::now();
-void resettimer() { Start = chrono::high_resolution_clock::now(); }
-int elapsedmillis() { return chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - Start).count(); }
-random_device rd;
-mt19937 rng(rd());
-template<typename T> inline T randint(T lo, T hi) { return uniform_int_distribution<T>(lo, hi)(rng); } // [lo,hi]
-template<typename T> inline T randel(vector<T>& v) { return v[uniform_int_distribution<T>((int)0, v.size() - 1)(rng)]; } // [lo,hi]
+#if _LOCAL
+#define assert(x) if (!(x)) __debugbreak()
 #endif
-const ll mod = 1e9 + 7;
 
-int hashp2(p2 a)
+int distance(int x, int y)
 {
-    return a.first + a.second * mod;
+    x = abs(x);
+    y = abs(y);
+    if (x < y) swap(x, y);
+    if (x == 1 && y == 0) return 3;
+    if (x == 2 && y == 2) return 4;
+
+    int delta = x - y;
+    // floor needed to round towards -inf
+    if (y > delta) return delta - 2 * floor((delta - y) / 3.0);
+    else return delta - 2 * floor((delta - y) / 4.0);
 }
 
-int32_t main()
+signed main()
 {
     fast();
 
-    dread(int, q);
+    auto bishop_possible = [](p2 pos)
+    {
+        return (pos.first + pos.second) % 2 == 0;
+    };
+
+    int q;
+    cin >> q;
     while (q--)
     {
-        dread(string, moves);
-        dread4(int, sx, sy, gx, gy);
-        int ans = -1;
-        int upperbound = inf;
-        p2 goal = mp(gx, gy);
-        p2 start = mp(sx, sy);
+        string pieces;
+        cin >> pieces;
+        bool queen = find(all(pieces), 'Q') != pieces.end();
+        bool rook = find(all(pieces), 'R') != pieces.end();
+        bool bishop = find(all(pieces), 'B') != pieces.end();
+        bool knight = find(all(pieces), 'N') != pieces.end();
+        bool king = find(all(pieces), 'K') != pieces.end();
+        bool pawn = find(all(pieces), 'P') != pieces.end();
+        p2 start;
+        p2 goal;
+        cin >> start.first >> start.second >> goal.first >> goal.second;
+        goal.first -= start.first;
+        goal.second -= start.second;
 
-
-        if (moves.find("Q") != string::npos)
+        int upper_bound = inf;
+        if (rook)
         {
-            p2 diff = p2(sx, sy) - p2(gx, gy);
-            if (diff.first == 0 || diff.second == 0 || abs(diff.first) == abs(diff.second))
+            upper_bound = min(upper_bound, 2LL);
+            if (goal.first == 0 || goal.second == 0) upper_bound = 1;
+
+        }
+        if (queen)
+        {
+            upper_bound = min(upper_bound, 2LL);
+            if (goal.first == 0 || goal.second == 0) upper_bound = 1;
+            if (abs(goal.first) == abs(goal.second)) upper_bound = 1;
+        }
+        vector<p2> moves;
+        if (knight)
+        {
+            upper_bound = min(upper_bound, distance(goal.first, goal.second));
+            moves.emplace_back(2, 1);
+            moves.emplace_back(-2, 1);
+            moves.emplace_back(2, -1);
+            moves.emplace_back(-2, -1);
+            moves.emplace_back(1, 2);
+            moves.emplace_back(-1, 2);
+            moves.emplace_back(1, -2);
+            moves.emplace_back(-1, -2);
+        }
+        if (king)
+        {
+            upper_bound = min(upper_bound, max(abs(goal.first), abs(goal.second)));
+            moves.emplace_back(1, 1);
+            moves.emplace_back(-1, 1);
+            moves.emplace_back(1, -1);
+            moves.emplace_back(-1, -1);
+            moves.emplace_back(0, 1);
+            moves.emplace_back(1, 0);
+            moves.emplace_back(0, -1);
+            moves.emplace_back(-1, 0);
+        }
+        if (pawn)
+        {
+            if (goal.second == 0 && goal.first >= 0) upper_bound = min(upper_bound, goal.first);
+            moves.emplace_back(1, 0);
+        }
+        if (bishop)
+        {
+            if (bishop_possible(goal)) upper_bound = min(upper_bound, 2LL);
+            if (abs(goal.first) == abs(goal.second)) upper_bound = 1;
+            repp(d, 1, 5)
             {
-                upperbound = min(upperbound, 1LL);
+                moves.emplace_back(d, d);
+                moves.emplace_back(-d, d);
+                moves.emplace_back(d, -d);
+                moves.emplace_back(-d, -d);
             }
-            else
+            
+        }
+
+        queue<pair<int, p2>> q;
+        q.emplace(0, p2(0, 0));
+        set<p2> seen;
+        while (sz(q)&&q.front().first<=min(6LL, upper_bound))
+        {
+            int d;
+            p2 p;
+            tie(d, p) = q.front();
+            q.pop();
+
+            p2 dg = p2(goal.first - p.first, goal.second - p.second);
+            if (bishop)
             {
-                upperbound = min(upperbound, 2LL);
+                if (bishop_possible(dg)) upper_bound = min(upper_bound, d + 2);
+                if (abs(dg.first) == abs(dg.second)) upper_bound = min(upper_bound, d + 1);
+            }
+            if (knight)
+            {
+                upper_bound = min(upper_bound, d + distance(dg.first,dg.second));
+            }
+            
+
+            if (seen.find(p) != seen.end()) continue;
+            seen.insert(p);
+
+            repe(m, moves)
+            {
+                p2 np = p2(p.first + m.first, p.second + m.second);
+                q.emplace(d + 1, np);
             }
         }
 
-        if (moves.find("R") != string::npos)
-        {
-            p2 diff = p2(sx, sy) - p2(gx, gy);
-            if (diff.first == 0 || diff.second == 0)
-            {
-                upperbound = min(upperbound, 1LL);
-            }
-            else
-            {
-                upperbound = min(upperbound, 2LL);
-            }
-        }
-
-        if (moves.find('K') != string::npos)
-        {
-            p2 diff = p2(sx, sy) - p2(gx, gy);
-            int diag = min(abs(diff.first), abs(diff.second));
-            upperbound = min(upperbound, diag + (max(abs(diff.first), abs(diff.second)) - diag));
-        }
-
-        auto getcolor = [](p2 a)
-        {
-            return (abs(a.first) % 2) + (abs(a.second) % 2);
-        };
-
-        auto works = [&](p2 a, p2 goal)
-        {
-            p2 diff = a - goal;
-            if (abs(diff.second) == abs(diff.first))
-            {
-                return 1;
-            }
-            else if (getcolor(a) == getcolor(goal))
-            {
-                return 2;
-            }
-            return -1;
-        };
-
-        if (moves.find("P") != string::npos)
-        {
-            p2 diff = p2(sx, sy) - p2(gx, gy);
-            if (diff.second == 0 && sx < gx)
-            {
-                upperbound = min(upperbound, gx - sx);
-            }
-        }
-
-        if (moves.find("B") != string::npos)
-        {
-            p2 diff = p2(sx, sy) - p2(gx, gy);
-            if (abs(diff.second) == abs(diff.first))
-            {
-                upperbound = min(upperbound, 1LL);
-            }
-            else if (getcolor(start) == getcolor(goal))
-            {
-                upperbound = min(upperbound, 2LL);
-            }
-            else if (moves.find("N") != string::npos)
-            {
-                vp2 dirs = { {1,2},{1,-2},{-1,2},{-1,-2}, {2,1}, {2,-1},{-2,1},{-2,-1} };
-                queue<pair<p2, int>> q;
-                unordered_set<int> vis;
-                q.emplace(mp(sx, sy), 0);
-                while (q.size())
-                {
-                    p2 pos; int moves;
-                    tie(pos, moves) = q.front();
-                    q.pop();
-
-                    int h = hashp2(pos);
-                    if (setcontains(vis, h)) continue;
-                    vis.insert(h);
-
-                    if (moves >= upperbound)
-                    {
-                        continue;
-                    }
-
-                    if (pos == goal)
-                    {
-                        upperbound = min(upperbound, moves);
-                        break;
-                    }
-
-                    int w = works(pos, goal);
-                    if (w != -1)
-                    {
-                        upperbound = min(upperbound, moves + w);
-                        break;
-                    }
-
-                    repe(dir, dirs)
-                    {
-                        p2 np = pos + dir;
-                        q.emplace(np, moves + 1);
-                    }
-                }
-            }
-        }
-
-
-
-        if (moves.find('N') != string::npos)
-        {
-            vp2 dirs = { {1,2},{1,-2},{-1,2},{-1,-2}, {2,1}, {2,-1},{-2,1},{-2,-1} };
-            queue<pair<p2, int>> q;
-            unordered_set<int> vis;
-            q.emplace(mp(sx, sy), 0);
-            while (q.size())
-            {
-                p2 pos; int moves;
-                tie(pos, moves) = q.front();
-                q.pop();
-
-                int h = hashp2(pos);
-                if (setcontains(vis, h)) continue;
-                vis.insert(h);
-
-                if (moves >= upperbound)
-                {
-                    continue;
-                }
-
-                if (pos == goal)
-                {
-                    upperbound = min(upperbound, moves);
-                    break;
-                }
-
-                repe(dir, dirs)
-                {
-                    p2 np = pos + dir;
-                    q.emplace(np, moves + 1);
-                }
-            }
-        }
-
-
-        if (upperbound == inf) upperbound = -1;
-        cout << upperbound << "\n";
+        if (upper_bound != inf) cout << upper_bound << "\n";
+        else cout << "-1\n";
     }
 
-    quit;
+    return 0;
 }
