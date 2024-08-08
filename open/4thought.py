@@ -25,4 +25,3 @@ for n in nums:
         print(f"4 {op[0]} 4 {op[1]} 4 {op[2]} 4 = {n}")
     else:
         print("no solution")
-
