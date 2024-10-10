@@ -75,27 +75,27 @@ signed main()
     // we want to keep going in one tree for some interval, then switch
     // O(nlog(n)+qlog(n)^2)
     // implementation details left as exercise for reader
-    node* down[int(5e5)][20];
-    int l_ignore[int(5e5)][20];
+    node* down[20][int(5e5)];
+    int l_ignore[20][int(5e5)];
     rep(i, n)
     {
         node* u = nodes[i];
         if (u->is_leaf())
         {
-            down[i][0] = u;
-            l_ignore[i][0] = 0;
+            down[0][i] = u;
+            l_ignore[0][i] = 0;
         }
         else
         {
-            down[i][0] = u->l_big() ? u->l : u->r;
-            l_ignore[i][0] = u->l_big() ? 0 : u->l->ccnt;
+            down[0][i] = u->l_big() ? u->l : u->r;
+            l_ignore[0][i] = u->l_big() ? 0 : u->l->ccnt;
         }
         repp(d, 1, 20)
         {
-            int downer = down[i][d - 1]->ind;
-            down[i][d] = down[downer][d - 1];
-            l_ignore[i][d] = l_ignore[i][d - 1] + l_ignore[downer][d - 1];
-            l_ignore[i][d] = min(l_ignore[i][d], BIG);
+            int downer = down[d-1][i]->ind;
+            down[d][i] = down[d-1][downer];
+            l_ignore[d][i] = l_ignore[d-1][i] + l_ignore[d-1][downer];
+            l_ignore[d][i] = min(l_ignore[d][i], BIG);
         }
     }
 
@@ -111,8 +111,8 @@ signed main()
             node* u = curr;
             for (int d = 19; d >= 0; d--)
             {
-                node* downer = down[u->ind][d];
-                int l = l_ignore[u->ind][d];
+                node* downer = down[d][u->ind];
+                int l = l_ignore[d][u->ind];
                 int r = l + downer->ccnt;
                 if (p>=l&&p<r)
                 {
