@@ -176,7 +176,7 @@ struct node
 		{
 			return;
 		}
-		if (chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - start).count() > 1)
+		if (chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now()-start).count()>1)
 		{
 			return;
 		}
@@ -203,6 +203,7 @@ struct node
 				children.emplace_back(new node(v, 0LL));
 				b.pop_back();
 				A.pop_back();
+				break;
 			}
 		}
 		// branch on largest children first
@@ -242,7 +243,7 @@ signed main()
 		int a, ac, b, bc;
 		cin >> a >> ac >> b >> bc;
 		a--; b--;
-		if (ac < bc)
+		if (ac<bc)
 		{
 			ans += bc;
 			c[a] += -(ac - bc);
@@ -280,11 +281,11 @@ signed main()
 
 	node* root = new node(-1, -1);
 	root->branch(0);
-	if (global_lb == -inf)
+	if (global_lb==-inf)
 	{
 		cout << -1;
 	}
-	else cout << int(round(ans - global_lb));
+	else cout << int(round(ans-global_lb));
 
 	return 0;
 }
