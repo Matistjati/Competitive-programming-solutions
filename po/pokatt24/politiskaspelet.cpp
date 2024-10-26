@@ -14,31 +14,20 @@ typedef pair<int, int> p2;
 #define repe(i, container) for (auto& i : container)
 #define sz(container) ((int)container.size())
 #define all(x) begin(x),end(x)
-#define ceildiv(x,y) ((x + y - 1) / (y))
 
 inline void fast() { ios::sync_with_stdio(false); cin.tie(NULL); cout.tie(NULL); }
-
-auto Start = chrono::high_resolution_clock::now();
-void resettimer() { Start = chrono::high_resolution_clock::now(); }
-int elapsedmillis() { return chrono::duration_cast<chrono::milliseconds>(chrono::high_resolution_clock::now() - Start).count(); }
-
 
 #if _LOCAL
 #define assert(x) if (!(x)) __debugbreak()
 #endif
 
-const int maxn = int(1e6);
-int n;
-vi nums;
-
 signed main()
 {
 	fast();
 
-	//ifstream in("C:\\Users\\matis\\desktop\\comp_prog\\x64\\debug\\in.txt");
-	//cin.rdbuf(in.rdbuf());
+	int n;
 	cin >> n;
-	nums.resize(n);
+	vi nums(n);
 	rep(i, n) cin >> nums[i];
 	vector<p2> numsorted(n);
 	rep(i, n) numsorted[i] = p2(nums[i], i);
