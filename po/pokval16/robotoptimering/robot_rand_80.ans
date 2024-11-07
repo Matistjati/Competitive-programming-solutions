@@ -1,16 +1,11 @@
-segs:
-    right
-    gotoblocked segs
-    forward
 main:
-    left
-    zero:
-    gotoblocked segs
-    forward
-    left
-    for 17 {
-        forward
-    }
-    right
-    goto zero
-
+        for 7 {
+                segs:
+                left
+                gotoblocked segs
+                forward
+                right
+                right
+        }
+        right
+        goto main
