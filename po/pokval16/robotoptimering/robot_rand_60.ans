@@ -1,0 +1,11 @@
+main:
+        left
+        for 12 {
+                gotoblocked segs
+                forward
+                left
+                left
+                segs:
+                left
+        }
+        goto main

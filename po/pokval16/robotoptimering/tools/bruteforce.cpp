@@ -101,8 +101,8 @@ random_device rd;
 mt19937 rng(rd());
 
 // lower inclusive, upper exclusive
-inline int randint(int low, int high) { return uniform_int_distribution<int>(low, high-1)(rng); }
-inline int randint(int high) { return randint(0,high); }
+inline int randint(int low, int high) { return uniform_int_distribution<int>(low, high - 1)(rng); }
+inline int randint(int high) { return randint(0, high); }
 #endif
 
 
@@ -142,7 +142,7 @@ int startdir;
 vector<instruction> program;
 vector<instruction> bestprogram;
 
-const int maxloop = 100;
+const int maxloop = 1000;
 
 int t = -1;
 
@@ -168,9 +168,13 @@ int score = inf;
 #if VIS
 #define iterC int(1e8)
 #else
-#define iterC int(1e5)
+#define iterC int(1e8)
 #endif
 
+const int PVIS_SIZE = int(5e8);
+
+vi PVIS;
+int seenver = 10;
 p2 simulate()
 {
 #if VIS
@@ -178,6 +182,7 @@ p2 simulate()
     ofstream cout("C:\\Users\\Matis\\Source\\repos\\Comp prog\\x64\\release\\out.txt");
 #endif
 
+    seenver++;
     p2 pos = startpos;
     int dir = startdir;
     // Find main
@@ -218,7 +223,7 @@ p2 simulate()
         if (inst.what == loop)
         {
             parent.push_back(node);
-            node = parent.size()-1;
+            node = parent.size() - 1;
             nodetoloop[node] = i;
         }
         if (inst.what == endloop)
@@ -232,20 +237,40 @@ p2 simulate()
     const int progsize = program.size();
     rep(i, iterC)
     {
-        if (i == int(3e3) && abs(pos.first-startpos.first)+abs(pos.second- startpos.second)<t) goto end;
-        if (i == int(1e4) && abs(pos.first-startpos.first)+abs(pos.second- startpos.second)<t) goto end;
+        //if (i == int(3e3) && abs(pos.first - startpos.first) + abs(pos.second - startpos.second) < t) goto end;
+        //if (i == int(1e4) && abs(pos.first - startpos.first) + abs(pos.second - startpos.second) < t) goto end;
         location++;
         instruction& in = program[location];
 
-
+        //cout << i << "\n";
 
 #if closestD
-        if (abs(goal.first-pos.first)+abs(goal.second-pos.second)<d)
+        if (abs(goal.first - pos.first) + abs(goal.second - pos.second) < d)
         {
             d = abs(goal.first - pos.first) + abs(goal.second - pos.second);
             closest = pos;
         }
 #endif
+
+        if (abs(startpos.first - pos.first) < 20 && abs(startpos.second - pos.second) < 20)
+        {
+            int dx = startpos.first - pos.first + 20;
+            int dy = startpos.second - pos.second + 20;
+            int ind = dx + dy * 40 + dir * 40 * 40 + location * 40 * 40 * 4;
+
+            if (sz(loopposses))
+            {
+                int loopcnt = program[loopposses[0]].loopcounter;
+                ind += (loopcnt == -inf ? program[loopposses[0]].target + 2 : loopcnt) * 40 * 40 * 4 * 30;
+            }
+            if (PVIS[ind] == seenver)
+            {
+                goto end;
+            }
+            //if (ind == 3207220) __debugbreak();
+            //assert(ind != ind);
+            PVIS[ind] = seenver;
+        }
 
         if (pos == goal) goto end;
 
@@ -290,11 +315,11 @@ p2 simulate()
             location = in.target;
             break;
         case instructionType::forw:
-            if (isempty(pos+directions[dir])) pos += directions[dir];
+            if (isempty(pos + directions[dir])) pos += directions[dir];
             break;
         case instructionType::le:
             dir--;
-            dir = (4+(dir % 4))%4;
+            dir = (4 + (dir % 4)) % 4;
             break;
         case instructionType::ri:
             dir++;
@@ -316,7 +341,7 @@ p2 simulate()
             callstack.pop();
             break;
         case endloop:
-            if (program[in.target].loopcounter > 0) location = in.target-1;
+            if (program[in.target].loopcounter > 0) location = in.target - 1;
             break;
         case label:
             break;
@@ -327,7 +352,7 @@ p2 simulate()
         }
     }
 
-    end:
+end:
 #if VIS
     rep(i, mazec.size())
     {
@@ -358,7 +383,11 @@ inline int calcscore(int x, int y)
 
 inline int calcscore_slow(vector<instruction>& program, int extra = -1, bool random = true)
 {
-    if (extra != -1) random = false;
+    if (extra != -1)
+    {
+        cerr << "BIG BOI\n";
+        random = false;
+    }
     vi loopposses;
     rep(i, program.size()) if (program[i].what == loop) loopposses.push_back(i);
     if (loopposses.size() == 0) return inf;
@@ -369,7 +398,7 @@ inline int calcscore_slow(vector<instruction>& program, int extra = -1, bool ran
     int ret = inf;
 
     //           0   1   2    3    4    5    6  7
-    vi highs = { 150,75, 150, 70,  10,   5, 150, 50 };
+    vi highs = { 150,75, 150, 70,  100,   5, 150, 50 };
     int high = highs[t];
 
     if (extra != -1) high = extra;
@@ -379,33 +408,20 @@ inline int calcscore_slow(vector<instruction>& program, int extra = -1, bool ran
 
     rep(i, high)
     {
-        rep(j, high)
+        if (random) program[loopposses[0]].target = randint(maxloop);
+        else program[loopposses[0]].target = i;
+
+        program[loopposses[0]].loopcounter = -inf;
+
+        p2 p = simulate();
+        int newscore = calcscore(p);
+        if (newscore < ret)
         {
-
-            if (random) program[loopposses[0]].target = randint(maxloop);
-            else program[loopposses[0]].target = i;
-
-            program[loopposses[0]].loopcounter = -inf;
-            if (loopposses.size() == 2)
-            {
-                if (random) program[loopposses[1]].target = randint(maxloop);
-                else program[loopposses[1]].target = j;
-
-                program[loopposses[1]].loopcounter = -inf;
-            }
-            p2 p = simulate();
-            int newscore = calcscore(p);
-            if (newscore < ret)
-            {
-                ret = newscore;
-                best[0] = i;
-                best[1] = j;
-            }
-            if (loopposses.size() == 1)
-            {
-                break;
-            }
+            ret = newscore;
+            best[0] = i;
+            if (ret == 0) break;
         }
+
     }
     program[loopposses[0]].target = best[0];
     if (loopposses.size() == 2)
@@ -484,7 +500,7 @@ void printprogram()
             indentation++;
             break;
         case label:
-            if (setcontains(usedlabels, i) || inst.name=="main") cout << tabs << inst.name << ":";
+            if (setcontains(usedlabels, i) || inst.name == "main") cout << tabs << inst.name << ":";
             else hascontent = false;
             break;
 
@@ -519,7 +535,7 @@ void buildprogram(vector<instruction>& program)
         if (inst.what == loop)
         {
             parent.push_back(node);
-            node=nodelabels.size();
+            node = nodelabels.size();
             nodelabels.push_back({});
             looplevel++;
         }
@@ -542,7 +558,7 @@ void buildprogram(vector<instruction>& program)
             vector<string> labels;
             int node = nodes[i];
 
-            while (node!=-1)
+            while (node != -1)
             {
                 labels.insert(labels.end(), all(nodelabels[node]));
                 node = parent[node];
@@ -592,7 +608,7 @@ void buildprogram(vector<instruction>& program)
             }
             debif(inst.target < 0);
         }
-        else if (inst.what==endloop)
+        else if (inst.what == endloop)
         {
             int level = 0;
 
@@ -626,27 +642,27 @@ void buildprogram(vector<instruction>& program)
         debassert(fixed);
     }
 
-    rep(i, program.size()-1)
+    rep(i, program.size() - 1)
     {
-        if (program[i].what==loop&&program[i+1].what==endloop)
+        if (program[i].what == loop && program[i + 1].what == endloop)
         {
-            program.erase(program.begin()+i);
-            program.erase(program.begin()+i);
+            program.erase(program.begin() + i);
+            program.erase(program.begin() + i);
             i = 0;
         }
     }
     program.push_back(instruction(eof));
 }
 
-void addi(instructionType what, string n="", int t=-1)
+void addi(instructionType what, string n = "", int t = -1)
 {
     if (what == noope) return;
 
-    if (n!="")
+    if (n != "")
     {
         program.push_back(instruction(what, n));
     }
-    else if (t!=-1)
+    else if (t != -1)
     {
         program.push_back(instruction(what, t));
     }
@@ -662,7 +678,7 @@ void generaterandomprogram()
 {
     program = vector<instruction>();
 
-    int costlen = 8 +randint(0, 5);
+    int costlen = 8 + randint(0, 5);
 
     vector<instructionType> instructions = { gotoblocked, forw,le,ri,loop };//  , call, ret
 
@@ -672,20 +688,24 @@ void generaterandomprogram()
     //addi(ri);
     //addi(gotoblocked, "main");
 
-    uniform_int_distribution<int> dist(0, instructions.size()-1);
+    uniform_int_distribution<int> dist(0, instructions.size() - 1);
 
     priority_queue<p2> loopendings;
 
     int cost = 0;
     int i = 0;
-    int maxloopnesting = 2;
+    int maxloopnesting = 1;
+    int numloops = 1;
     int looplevel = 0;
-    uniform_int_distribution<int> usegoto(0, 5);
-    while (cost<costlen)
+    uniform_int_distribution<int> usegoto(1, 1);
+    uniform_int_distribution<int> goto2(0, 10);
+    while (cost < costlen)
     {
         if (usegoto(rng))
         {
-            instructionType inst = instructions[dist(rng)];
+            instructionType inst;
+            if (goto2(rng) == 0) inst = gotoblocked;
+            else inst = instructions[dist(rng)];
             switch (inst)
             {
             case call:
@@ -700,16 +720,18 @@ void generaterandomprogram()
                 break;
             case loop:
                 if (looplevel + 1 > maxloopnesting) continue;
+                if (numloops == 0) continue;
+                numloops--;
                 addi(loop, randint(maxloop));
                 looplevel++;
-                loopendings.emplace(i+randint(costlen - cost), program.size());
+                loopendings.emplace(i + randint(costlen - cost), program.size());
                 break;
             default:
                 break;
             }
 
 
-            while (loopendings.size() && cost>loopendings.top().first)
+            while (loopendings.size() && cost > loopendings.top().first)
             {
                 p2 p = loopendings.top();
                 loopendings.pop();
@@ -765,7 +787,7 @@ void genstupid()
 {
     program = vector<instruction>();
 
-    vector<instructionType> instructions = { forw,le,ri, noope};
+    vector<instructionType> instructions = { forw,le,ri, noope };
 
 
     addi(label, "main");
@@ -787,7 +809,7 @@ void genstupid()
     addi(gotO, "main");
 }
 
-vi perm = {0,0,0,1,2};
+vi perm = { 0,0,0,1,2 };
 set<vi> visited;
 vvi instrs;
 int instrI = 0;
@@ -795,7 +817,7 @@ int highperm = 7;
 
 void instrfill(int index, vi& values)
 {
-    if (index== highperm)
+    if (index == highperm)
     {
         instrs.push_back(values);
         return;
@@ -811,7 +833,7 @@ vector<instructionType> instructions = { gotoblocked, forw,le,ri,loop, gotO };
 
 void doalllen5(int costints, vector<string>& labels, vector<instruction>& instructs)
 {
-    if (costints==0)
+    if (costints == 0)
     {
         vector<instruction> prog(instructs);
         prog.push_back(instruction(gotO, "main"));
@@ -839,7 +861,7 @@ void doalllen5(int costints, vector<string>& labels, vector<instruction>& instru
     rep(i, instructions.size())
     {
         instructionType& t = instructions[i];
-        if (t==forw||t==ri||t==le)
+        if (t == forw || t == ri || t == le)
         {
             instructs.push_back(instruction(t));
             labels.push_back(to_string(instructs.size()));
@@ -848,7 +870,7 @@ void doalllen5(int costints, vector<string>& labels, vector<instruction>& instru
             labels.pop_back();
 
         }
-        else if (t==loop)
+        else if (t == loop)
         {
             rep(i, 3)
             {
@@ -859,13 +881,13 @@ void doalllen5(int costints, vector<string>& labels, vector<instruction>& instru
                 labels.pop_back();
             }
         }
-        else if (t==gotoblocked||t==gotO)
+        else if (t == gotoblocked || t == gotO)
         {
             if (instructs.back().what == gotO) continue;
             rep(i, min(3, int(labels.size())))
             {
                 instructs.push_back(instruction(t, labels[i]));
-                doalllen5(costints - (t==gotoblocked), labels, instructs);
+                doalllen5(costints - (t == gotoblocked), labels, instructs);
                 instructs.pop_back();
             }
         }
@@ -887,7 +909,7 @@ void precomp()
 
 void addic(instructionType t)
 {
-    if (t==call)
+    if (t == call)
     {
         addi(t, "segs");
     }
@@ -968,7 +990,7 @@ void genstupidperm()
 
     if (instrI % 100000 == 0) cout << instrI;
 
-    if (instrI==instrs.size())
+    if (instrI == instrs.size())
     {
         cout << instrI;
         instrs = vvi();
@@ -1005,126 +1027,22 @@ static inline void trim(std::string& s) {
 void parseprogram()
 {
 
-//const char* p = R"V0G0N(
-//main:
-//        forward
-//        right
-//        forward
-//        gotoblocked l11
-//        l4:
-//        for 32 {
-//                forward
-//                right
-//                forward
-//                left
-//                forward
-//        }
-//        forward
-//        l11:
-//        left
-//        gotoblocked l4
-//        goto main
-//)V0G0N";
-
-//const char* p = R"V0G0N(
-//main:
-//    right
-//    gotoblocked main
-//
-//    l1:
-//    right
-//    gotoblocked l1
-//
-//
-//    forward
-//    right
-//    right
-//    goto main
-//)V0G0N";
-
-
-
-const char* p = R"V0G0N(
+    const char* p = R"V0G0N(
 main:
-    for 12 {
-            right
-            for 40 {
-                    forward
-                    goto nine
-                    five:
-                    left
-                    gotoblocked ten
-                    forward
-                    right
-                    nine:
-                    gotoblocked five
-                    ten:
-            }
-    }
-    right
-    goto main
+        for 3 {
+                gotoblocked l8
+                forward
+                right
+                right
+                gotoblocked l9
+                l8:
+                right
+                l9:
+                right
+        }
+        right
+        goto main
 )V0G0N";
-
-//const char* p = R"V0G0N(
-//main:
-//        left
-//        for 12 {
-//                forward
-//                forward
-//                for 17 {
-//                        left
-//                        forward
-//                        left
-//                        forward
-//                        left
-//                        left
-//                }
-//                forward
-//        }
-//        goto main
-//)V0G0N";
-
-//const char* p = R"V0G0N(
-//main:
-//    sadjgs:
-//    for 10 {
-//        segs:
-//        for 20 {
-//            amogussex:
-//            amongsus:
-//        }
-//        binladen:
-//        for 10 {
-//            bogsax:
-//        }
-//        asjfdi:
-//    }
-//    socks:
-//    feet:
-//    goto main
-//)V0G0N";
-
-//const char* p = R"V0G0N(
-//main:
-//        gotoblocked l10
-//        for 28 {
-//                right
-//                for 33 {
-//                        left
-//                        forward
-//                        left
-//                        right
-//                        forward
-//                        right
-//                        forward
-//                }
-//        }
-//        l10:
-//        right
-//        forward
-//        goto main
-//
-//)V0G0N";
 
     string s(p);
 
@@ -1200,13 +1118,13 @@ int32_t main()
 #if 1
     //ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
     //ifstream cin("C:\\Users\\Matis\\downloads\\robot\\robot_path_freedom2.in");
-    ifstream cin("C:\\Users\\Matis\\documents\\robot\\maps\\robot_rand_80.in");
+    ifstream cin("e:\\maze.txt");
     //ifstream cin("C:\\Users\\Matis\\documents\\robot\\maps\\robot_rand_80.in");
     //ifstream cin("C:\\Users\\Matis\\documents\\robot\\maps\\robot_cross.in");
     //ifstream cin("C:\\Users\\Matis\\documents\\robot\\maps\\test2.in");
 #endif
 
-
+    PVIS.resize(PVIS_SIZE);
 
     srand(time(NULL));
     dread(string, _);
@@ -1239,23 +1157,26 @@ int32_t main()
 
         if (maze[i][j] == 'M') goal = { j,i };
 
-        if (maze[i][j] != '#' && maze[i][j]!='M') maze[i][j] = '.';
+        if (maze[i][j] != '#' && maze[i][j] != 'M') maze[i][j] = '.';
     }
 
 
-    precomp();
+    //precomp();
 
     parseprogram();
 
 
     p2 ending = simulate();
+    //int newscore = calcscore_slow(program, 500, false);
     int newscore = calcscore(ending);
+    cerr << newscore << "\n";
 #if VIS
     cout << newscore << " " << getprogramlen(program);
     return 0;
 #endif
-    if (ending.first>23983598)
+    if (1 || ending.first > 23983598)
     {
+        bestprogram = program;
         printprogram();
     }
 
@@ -1265,7 +1186,7 @@ int32_t main()
     vi loopposses;
     rep(i, program.size()) if (program[i].what == loop) loopposses.push_back(i);
 
-    int score = calcscore(0,0)+inf;
+    int score = calcscore(0, 0) + inf;
     rep(i, 100)
 #if J
         rep(j, 100)
@@ -1313,7 +1234,7 @@ int32_t main()
 #if 1
 
     //               0    1   2    3    4    5   6   7
-    vi scorereqs = { 175, 90, 100, 685, 800, 69, 100, 40};
+    vi scorereqs = { 175, 90, 100, 685, 800, 69, 100, 40 };
     int scorereq = scorereqs[t];
 
     ll n_checked = 0;
@@ -1329,12 +1250,12 @@ int32_t main()
         p2 p = simulate();
         int newscore = calcscore(p);
 
-        if (newscore < scorereq) newscore = calcscore_slow(program);
+        if (newscore < scorereq) newscore = min(newscore,calcscore_slow(program));
         //newscore = calcscore_slow(program, 100);
-        if (newscore < 500) newscore = calcscore_slow(program, 100);
+        if (newscore < 500) newscore = min(newscore, calcscore_slow(program, 500, false));
 
 
-        if (newscore < score)
+        if (newscore <= score)
         {
             bestprogram = program;
             score = newscore;
@@ -1343,14 +1264,14 @@ int32_t main()
             cout << p.first << " " << p.second << " , dist: " << score << ", len: " << getprogramlen(program) << "\n";
             printprogram();
 
-            if (score==0)
+            if (score == 0)
             {
                 cout << "checked: " << n_checked << "\n";
                 score = 1;
             }
         }
         // Make sure n checked can be viewed during debugging
-        if (score>inf) cout << n_checked;
+        if (score > inf) cout << n_checked;
         n_checked++;
     }
     cout << n_checked;
