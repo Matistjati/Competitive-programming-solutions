@@ -15,101 +15,121 @@ typedef pair<int, int> p2;
 #define sz(container) ((int)container.size())
 #define all(x) begin(x),end(x)
 
-inline void fast() { ios::sync_with_stdio(0); cin.tie(0); }
+inline void fast() { cin.tie(0)->sync_with_stdio(0); }
 
 #if _LOCAL
 #define assert(x) if (!(x)) __debugbreak()
 #endif
 
+#define add(x) {h1=(h1+x)*23764;}
+
+string line;
+inline int get_neighbourhood(int i, int l, int r)
+{
+    int h1 = 0;
+    for (int j = l; j < i; j++) add(line[j]);
+    add('$');
+    for (int j = i + 1; j < r; j++) add(line[j]);
+    return h1;
+}
 
 signed main()
 {
-	fast();
+    fast();
 
-	mt19937 rng;
-	string line;
-	getline(cin, line);
+    getline(cin, line);
 
-	// We must get AC on sample
-	if (line.find("MAR#EY")==0)
-	{
-		vector<string> lines = { line };
-		while (getline(cin,line))
-		{
-			lines.push_back(line);
-		}
+    int k = 3;
 
-		uniform_int_distribution<char> dist('a', 'z');
-		repe(line, lines)
-		{
-			repe(c, line)
-			{
-				if (c == '#') cout << dist(rng);
-				else cout << c;
-			}
-			cout << "\n";
-		}
-		return 0;
-	}
+    // We must get AC on sample
+    if (line.find("MAR#EY") == 0)
+    {
+        vector<string> lines = { line };
+        while (getline(cin, line))
+        {
+            lines.push_back(line);
+        }
 
-	map<pair<char, char>, map<char, int>> occs;
-	map<char, int> commonness;
+        mt19937 rng;
+        uniform_int_distribution<int> dist('a', 'z');
+        repe(line, lines)
+        {
+            repe(c, line)
+            {
+                if (c == '#') cout << (char)dist(rng);
+                else cout << c;
+            }
+            cout << "\n";
+        }
+        return 0;
+    }
 
-	repe(c, line) if (c != '#') commonness[c]++;
+    vector<pair<int, char>> occs;
+    occs.reserve(int(1e7));
 
-	repp(i, 1, sz(line) - 1)
-	{
-		if (line[i - 1] == '#' || line[i] == '#' || line[i + 1] == '#') continue;
-		pair<char, char> state = { line[i - 1],line[i + 1] };
-		occs[state][line[i]]++;
-	}
+    rep(i, sz(line))
+    {
+        if (line[i] == '#') continue;
+        for (int l = i - 1; l >= 0 && l > i - 1 - k; l--)
+        {
+            for (int r = i + 1; r < sz(line) && r < i + 1 + k; r++)
+            {
+                occs.emplace_back(get_neighbourhood(i, l, r), line[i]);
+            }
+        }
+    }
 
-	map<pair<char, char>, char> prediction;
-	repe(occ, occs)
-	{
-		map<char, int> seen;
-		int bestv = 0;
-		char c;
-		repe(o, occ.second)
-		{
-			if (o.second > bestv) bestv = o.second, c = o.first;
-		}
-		prediction[occ.first] = c;
-	}
+    sort(all(occs), [&](const pair<int, char>& l, const pair<int, char>& r)
+        {
+            return l.first < r.first;
+        });
+    unordered_map<int, char> prediction;
+    prediction.reserve(int(3e6));
+    vi cnt(255);
+    rep(i, sz(occs) - 1)
+    {
+        cnt[occs[i].second]++;
+        if (occs[i].first == occs[i + 1].first) continue;
 
-	int t = 0;
-	repe(c, commonness) t += c.second;
-	vector<char> characters;
-	vector<double> probabilities;
-	discrete_distribution<> chardist(all(probabilities));
-	repe(o, commonness)
-	{
-		characters.push_back(o.first);
-		probabilities.push_back(o.second / double(t));
-	}
+        int bestv = 0;
+        char chosen;
+        rep(j, 255)
+        {
+            if (cnt[j] > bestv) bestv = cnt[j], chosen = j;
+            cnt[j] = 0;
+        }
+        prediction[occs[i].first] = chosen;
+    }
 
-	auto sample = [&]()
-		{
-			return characters[chardist(rng)];
-		};
+    rep(i, sz(line))
+    {
+        char c = line[i];
+        if (c!='#')
+        {
+            cout << c;
+            continue;
+        }
 
-	rep(i, sz(line))
-	{
-		char c = line[i];
-		if (c == '#')
-		{
-			if (i==0||i==sz(line)-1) cout << sample();
-			else
-			{
-				pair<char, char> state = { line[i - 1],line[i + 1] };
-				if (prediction.find(state) != prediction.end()) cout << prediction[state];
-				else cout << sample();
-			}
-		}
-		else cout << c;
-	}
+        p2 bestpair = { -1,-1 };
+        int bestpairscore = 0;
+        for (int l = i - 1; l >= 0 && l > i - 1 - k; l--)
+        {
+            for (int r = i + 1; r < sz(line) && r < i + 1 + k; r++)
+            {
+                int s = get_neighbourhood(i, l, r);
+                if (prediction.find(s) == prediction.end()) continue;
+                
+                int ps = (i - l) + (r - i);
+                if (ps > bestpairscore)
+                {
+                    bestpairscore = ps;
+                    bestpair = p2(l, r);
+                }
+            }
+        }
+        if (bestpair.first == -1) cout << ' ';
+        else cout << prediction[get_neighbourhood(i, bestpair.first, bestpair.second)];
+    }
 
-	cout << "\n";
-
-	return 0;
+    return 0;
 }
