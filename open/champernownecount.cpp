@@ -26,18 +26,15 @@ signed main()
 {
     fast();
 
-
-    string s;
-    cin >> s;
-
-    string ans = "";
-    repe(c, s)
+    int n, k;
+    cin >> n >> k;
+    int ans = 0;
+    int v = 0;
+    repp(i, 1, n + 1)
     {
-        if (c == '<')
-        {
-            ans.pop_back();
-        }
-        else ans.push_back(c);
+        int m = pow(10, sz(to_string(i)));
+        v = (v * m + i) % k;
+        ans += v == 0;
     }
     cout << ans;
 

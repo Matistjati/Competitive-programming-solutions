@@ -26,20 +26,22 @@ signed main()
 {
     fast();
 
-
-    string s;
-    cin >> s;
-
-    string ans = "";
-    repe(c, s)
+    int a, b;
+    cin >> a >> b;
+    int balance = 0;
+    rep(i, a)
     {
-        if (c == '<')
-        {
-            ans.pop_back();
-        }
-        else ans.push_back(c);
+        int u, v;
+        cin >> u >> v;
+        balance += u * v;
     }
-    cout << ans;
+    rep(i, b)
+    {
+        int u, v;
+        cin >> u >> v;
+        balance -= u * v;
+    }
+    cout << (balance == 0 ? "same" : "different");
 
     return 0;
 }

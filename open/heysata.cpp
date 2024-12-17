@@ -22,24 +22,17 @@ inline void fast() { cin.tie(0)->sync_with_stdio(0); }
 #endif
 
 
+
 signed main()
 {
     fast();
 
-
+    int _;
+    char c;
     string s;
-    cin >> s;
+    cin >> _ >> c >> s;
 
-    string ans = "";
-    repe(c, s)
-    {
-        if (c == '<')
-        {
-            ans.pop_back();
-        }
-        else ans.push_back(c);
-    }
-    cout << ans;
+    cout << (s.find(c) != string::npos ? "Unnar fann hana!" : "Unnar fann hana ekki!");
 
     return 0;
 }

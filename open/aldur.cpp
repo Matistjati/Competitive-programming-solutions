@@ -22,22 +22,19 @@ inline void fast() { cin.tie(0)->sync_with_stdio(0); }
 #endif
 
 
+
 signed main()
 {
     fast();
 
-
-    string s;
-    cin >> s;
-
-    string ans = "";
-    repe(c, s)
+    int n;
+    cin >> n;
+    int ans = inf;
+    rep(i, n)
     {
-        if (c == '<')
-        {
-            ans.pop_back();
-        }
-        else ans.push_back(c);
+        int x;
+        cin >> x;
+        ans = min(ans, x);
     }
     cout << ans;
 

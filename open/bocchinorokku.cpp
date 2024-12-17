@@ -26,20 +26,16 @@ signed main()
 {
     fast();
 
+    int n;
+    cin >> n;
+    vector<p2> rocks(n);
+    rep(i, n) cin >> rocks[i].first, rocks[i].second = i;
 
-    string s;
-    cin >> s;
+    sort(all(rocks));
 
-    string ans = "";
-    repe(c, s)
-    {
-        if (c == '<')
-        {
-            ans.pop_back();
-        }
-        else ans.push_back(c);
-    }
-    cout << ans;
+    vi ans(n);
+    rep(i, n) ans[rocks[i].second] = i;
+    repe(u, ans) cout << u << " ";
 
     return 0;
 }

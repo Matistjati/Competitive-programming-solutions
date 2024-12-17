@@ -26,20 +26,32 @@ signed main()
 {
     fast();
 
-
-    string s;
-    cin >> s;
-
-    string ans = "";
-    repe(c, s)
+    int t;
+    cin >> t;
+    while (t--)
     {
-        if (c == '<')
+        int k;
+        cin >> k;
+
+        vi seen(k+1, -1);
+        int f1 = 1;
+        int f2 = 1;
+        int ind = 2;
+        while (true)
         {
-            ans.pop_back();
+            int f3 = f1 + f2;
+            f3 %= k;
+            if (seen[f3] != -1)
+            {
+                cout << seen[f3] << "\n";
+                break;
+            }
+            seen[f3] = ind;
+            ind++;
+            f1 = f2;
+            f2 = f3;
         }
-        else ans.push_back(c);
     }
-    cout << ans;
 
     return 0;
 }

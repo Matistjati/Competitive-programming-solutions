@@ -26,19 +26,18 @@ signed main()
 {
     fast();
 
+    int n, d;
+    cin >> n >> d;
 
-    string s;
-    cin >> s;
-
-    string ans = "";
-    repe(c, s)
+    map<int, int> rem;
+    rep(i, n)
     {
-        if (c == '<')
-        {
-            ans.pop_back();
-        }
-        else ans.push_back(c);
+        int x;
+        cin >> x;
+        rem[x / d]++;
     }
+    int ans = 0;
+    repe(r, rem) ans += r.second * (r.second - 1) / 2;
     cout << ans;
 
     return 0;
