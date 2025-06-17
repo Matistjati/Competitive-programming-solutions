@@ -1,0 +1,1 @@
+../po/pofinal24/golvyta.cpp

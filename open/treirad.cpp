@@ -1,0 +1,1 @@
+../po/skolkval24/treirad.cpp

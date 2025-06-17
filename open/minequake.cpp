@@ -1,0 +1,1 @@
+../boi/2023/minequake.cpp

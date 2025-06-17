@@ -1,0 +1,1 @@
+../po/skolkval09/lamps.cpp

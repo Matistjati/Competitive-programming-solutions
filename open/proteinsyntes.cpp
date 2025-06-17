@@ -1,0 +1,1 @@
+../po/pokval24/proteinsyntes.cpp

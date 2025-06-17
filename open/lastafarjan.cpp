@@ -1,0 +1,1 @@
+../po/pokval13/lastafarjan.cpp

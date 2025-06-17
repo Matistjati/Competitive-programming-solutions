@@ -1,0 +1,1 @@
+../po/pokval17/snobollskrig2.cpp

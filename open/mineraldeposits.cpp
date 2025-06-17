@@ -1,0 +1,1 @@
+../boi/2023/mineraldeposits.cpp

@@ -1,0 +1,1 @@
+../po/pokval25/kvallsfika.cpp

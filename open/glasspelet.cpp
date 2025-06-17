@@ -1,0 +1,1 @@
+../po/pokval20/glasspelet.cpp

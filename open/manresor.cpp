@@ -1,0 +1,1 @@
+../po/pofinal19/manresor.cpp

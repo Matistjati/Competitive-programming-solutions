@@ -1,0 +1,1 @@
+../po/pocamp24/kopafika.cpp

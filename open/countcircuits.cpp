@@ -38,43 +38,6 @@ void allsums(int n, vector<pair<int, int>>& pairs, pair<int, int> value, vector<
 	allsums(n + 1, pairs, added, finalPairs);
 }
 
-bool compare(const pair<int, int>& first, const pair<int, int>& second)
-{
-	return first.first <= second.first;
-}
-
-int n_pairs(vector<int> firstx, vector<int> firsty, vector<int> secondx, vector<int> secondy)
-{
-	int n_pair = 0;
-	rep(i, firstx.size())
-	{
-		int target = firstx[i];
-		auto lower = lower_bound(secondx.begin(), secondx.end(), target);
-		int index = lower - secondx.begin();
-
-		if (index < 0)
-		{
-			continue;
-		}
-
-		for (int j = index; j < secondx.size(); j++)
-		{
-			if (secondx[j] != target)
-			{
-				break;
-			}
-
-			if (firsty[i] == -secondy[j])
-			{
-				n_pair++;
-			}
-		}
-
-	}
-
-	return n_pair;
-}
-
 int main()
 {
 	int n;
@@ -133,24 +96,6 @@ int main()
 
 	secondPairs.erase(next(secondPairs.begin(), zero_index));
 
-
-	//firstPairs.clear();
-	//secondPairs.clear();
-	//firstPairs.push_back({ 0, 0 });
-	//firstPairs.push_back({ 0, 0 });
-
-	////firstPairs.push_back({ 3,2 });
-
-	//secondPairs.push_back({ 0,0 });
-	//secondPairs.push_back({ 0,0 });
-	//secondPairs.push_back({ -2,-1 });
-	//secondPairs.push_back({ -2,-2 });
-	//secondPairs.push_back({ -3,-1 });
-	//secondPairs.push_back({ -3,-2 });
-	//secondPairs.push_back({ -3,-3 });
-	//secondPairs.push_back({ -4,-1 });
-	//secondPairs.push_back({ -4,-2 });
-
 	map<pair<int, int>, int> firstSet;
 	map<pair<int, int>, int> secondSet;
 	ll n_subsets = 0;
@@ -182,67 +127,6 @@ int main()
 			n_subsets += secondSet[target]*coord.second;
 		}
 	}
-
-	/*
-	vector<int> secondFirst;
-	vector<int> secondSecond;
-	rep(i, secondPairs.size())
-	{
-		secondFirst.push_back(secondPairs[i].first);
-		secondSecond.push_back(secondPairs[i].second);
-	}
-
-	rep(i, firstPairs.size())
-	{
-		if (firstPairs[i].first == 0 && firstPairs[i].second == 0)
-		{
-			n_subsets++;
-			continue;
-		}
-
-		int target = firstPairs[i].first * -1;
-
-		auto correct = lower_bound(secondFirst.begin(), secondFirst.end(), target);
-		int index = correct - secondFirst.begin();
-
-		if (index < 0)
-		{
-			continue;
-		}
-
-		while (true)
-		{
-			pair<int, int> curr = {secondFirst[index],secondSecond[index]};
-			if (curr.first != -firstPairs[i].first)
-			{
-				break;
-			}
-			int sumY = curr.second + firstPairs[i].second;
-			if (sumY == 0)
-			{
-				n_subsets++;
-			}
-
-			index += 1;
-			if (index > secondPairs.size() - 1)
-			{
-				break;
-			}
-		}*/
-
-		/*rep(j, secondPairs.size())
-		{
-			int sumX = secondPairs[j].first + firstPairs[i].first;
-			int sumY = secondPairs[j].second + firstPairs[i].second;
-			if (sumX == 0 && sumY == 0)
-			{
-				n_subsets++;
-			}
-			else if (sumX > 0 && sumY > 0)
-			{
-				break;
-			}
-		}*/
 
 	write(n_subsets);
 }

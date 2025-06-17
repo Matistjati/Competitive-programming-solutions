@@ -1,0 +1,1 @@
+../po/pokatt25/jagarattor.cpp

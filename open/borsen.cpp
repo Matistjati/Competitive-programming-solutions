@@ -1,0 +1,1 @@
+../po/pokval12/borsen.cpp
