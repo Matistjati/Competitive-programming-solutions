@@ -1,0 +1,1 @@
+../po/pokatt16/practice/kakor.cpp
