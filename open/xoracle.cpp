@@ -1,0 +1,1 @@
+../noi/2025/xoracle.cpp
