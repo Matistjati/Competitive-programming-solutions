@@ -40,7 +40,7 @@ typedef vector<vvp3> vvvp3;
 typedef tuple<int, int, int, int> p4;
 typedef vector<p4> vp4;
 
-#define PBDS 1
+#define PBDS 0
 #define _LOCAL _MSC_VER > 0
 #if _LOCAL
 #define gc() getchar()
@@ -68,6 +68,7 @@ struct chash { // large odd number for C
 
 template<typename T, typename U> using fast_map = __gnu_pbds::gp_hash_table<T, U, chash>;
 template<typename T> using fast_set = __gnu_pbds::gp_hash_table<T, null_type, chash>;
+template<typename T, typename H> using fast_set_h = __gnu_pbds::gp_hash_table<T, null_type, H>;
 #endif
 
 #endif
@@ -75,8 +76,8 @@ template<typename T> using fast_set = __gnu_pbds::gp_hash_table<T, null_type, ch
 #define FAST_INPUT 0
 #define FILE_TC 0
 #if FILE_TC && _LOCAL
-ifstream filein("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
-//ifstream filein("E:\\desktop\\po-repos\\swedish-olympiad-2023\\online\\tomtplanering\\data\\secret\\group09\\009-case09.in");
+//ifstream filein("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
+ifstream filein("E:\\downloads\\test_data\\test_data\\005-case05.in");
 //ifstream filein("E:\\desktop\\po-repos\\swedish-olympiad-2023\\online\\tomtplanering\\data\\secret\\group10\\010-case10.in");
 
 #define cin filein
@@ -155,55 +156,62 @@ template<typename T> inline T randel(vector<T>& v) { return v[uniform_int_distri
 #endif
 const ll mod = 1e9 + 7;
 
-int query(int v, set<p2>& known)
+int query(int v)
 {
-    static vi seen(1e6 + 10, -1);
-    if (seen[v] != -1) return seen[v];
     cout << "Q " << v << endl;
     cout.flush();
     dread(int, ans);
-    known.insert(p2(ans, v));
-    return seen[v] = ans;
+    return ans;
 }
+
+
+// Solve using parallell binary search. This is better than the other solution, as it's easier to generalize
+void search(int lo, int hi, vp2& has, vi& ans)
+{
+    if (has.empty()) return;
+    if (lo + 1 == hi)
+    {
+        repe(h, has) ans[h.second] = lo;
+        return;
+    }
+    int mid = (lo + hi) / 2;
+
+    vp2 l;
+    vp2 r;
+    int v = query(mid);
+    rep(i, has.size())
+    {
+        if (has[i].first < v) l.emplace_back(has[i]);
+        else if (has[i].first > v) r.emplace_back(has[i]);
+        else ans[has[i].second] = mid;
+    }
+
+    search(lo, mid, l, ans);
+    search(mid, hi, r, ans);
+}
+
 
 int32_t main()
 {
     fast();
 
-
     dread2(int, c, a);
-    readvector(int, queries, a);
-
-    set<p2> known;
+    vp2 nums;
+    rep(i, a)
+    {
+        dread(int, v);
+        nums.emplace_back(v, i);
+    }
+    sort(all(nums));
 
     vi ans(a);
-    rep(i, a)
-    {
-        auto hi = known.lower_bound(p2(queries[i], inf));
-        int r = c + 1;
-        if (hi != known.end()) r = hi->second;
-        int l = 0;
-        if (hi != known.begin()) l = prev(hi)->second;
-        while (r - l > 1)
-        {
-            int mid = (r + l) / 2;
-            int v = query(mid, known);
-            if (v == queries[i])
-            {
-                l = mid;
-                break;
-            }
-            if (v > queries[i]) r = mid;
-            else l = mid;
-        }
 
-        ans[i] = l;
-    }
+    search(0, c + 1, nums, ans);
 
     cout << "A ";
-    rep(i, a)
+    repe(a, ans)
     {
-        cout << ans[i] << " ";
+        cout << a << " ";
     }
 
     quit;

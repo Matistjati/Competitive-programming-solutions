@@ -1,1 +1,0 @@
-../po/pofinal24/quack.cpp

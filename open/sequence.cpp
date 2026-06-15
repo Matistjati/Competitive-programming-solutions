@@ -2,117 +2,100 @@
 using namespace std;
 
 typedef long long ll;
-#define int ll
-const int inf = int(1e18);
+const ll inf = 1e18;
 
-typedef vector<int> vi;
+typedef vector<ll> vi;
 typedef vector<vi> vvi;
-typedef pair<int, int> p2;
+typedef pair<ll, ll> p2;
 
-#define rep(i, high) for (int i = 0; i < high; i++)
-#define repp(i, low, high) for (int i = low; i < high; i++)
+#define rep(i, high) for (ll i = 0; i < (high); i++)
+#define repp(i, lo, high) for (ll i = (lo); i < (high); i++)
 #define repe(i, container) for (auto& i : container)
-#define sz(container) ((int)container.size())
-#define all(x) begin(x),end(x)
+#define sz(x) ((ll)(x).size())
+#define all(x) begin(x), end(x)
 
-inline void fast() { ios::sync_with_stdio(0); cin.tie(0); cout.tie(0); }
+vi w;
+vvi divisors;
+unordered_map<ll, ll> dp;
 
-#if _LOCAL
-#define assert(x) if (!(x)) __debugbreak()
-#endif
-
-const int MAX_PR = 1e6+10;
-vi smallestfactor(MAX_PR);
-
-// Find smallest factor of all numbers in range[0, hi)
-void smallestFactorSieve(int hi = MAX_PR)
+ll comp_hash(set<ll>&x)
 {
-    rep(i, hi) smallestfactor[i] = i;
-    for (int i = 0; i < hi; i += 2) smallestfactor[i] = 2;
-
-    repp(i, 3, min(hi + 0., ceil(sqrt(hi)) + 10))
+    ll ret = 1;
+    repe(v, x)
     {
-        if (smallestfactor[i] == i)
-        {
-            for (size_t j = i * i; j < hi; j += i)
-            {
-                if (smallestfactor[j] == j) smallestfactor[j] = i;
-            }
-        }
+        ret = (ret + v) * 12423457;
     }
-}
-typedef unsigned long long ull;
 
-// Factor n in log(n) time
-vector<ull> GetFactors(int n)
-{
-    vector<ull> factors;
-    int k = n;
-    while (k != 1 && k != 0)
-    {
-        factors.emplace_back(smallestfactor[k]);
-        k /= smallestfactor[k];
-    }
-    return factors;
-}
-// Helper function
-void setDivisors(ull n, ull i, vector<ull>& divisors, vector<pair<ull, ull>>& factors) {
-    ull j, x, k;
-    for (j = i; j < factors.size(); j++) {
-        x = factors[j].first * n;
-        for (k = 0; k < factors[j].second; k++) {
-            divisors.push_back(x);
-            setDivisors(x, j + 1, divisors, factors);
-            x *= factors[j].first;
-        }
-    }
-}
-// Get all factor from a list of primes
-vector<ull> getDivisors(vector<ull> primes)
-{
-    unordered_map<ull, ull> primeCount;
-    repe(prime, primes) primeCount[prime]++;
-    vector<pair<ull, ull>> factorCount;
-    repe(p, primeCount) factorCount.emplace_back(p);
-    vector<ull> ret;
-    setDivisors(1, 0, ret, factorCount);
-    ret.push_back(1);
     return ret;
 }
 
-signed main()
+ll best(set<ll>& state)
 {
-    fast();
-    smallestFactorSieve();
-
-    int n;
-    cin >> n;
-    vi dp(n + 1, 1);
-    vi par(n + 1, -1);
-
-
-    for (int i = n; i > 0; i--)
+    if (state.empty()||(sz(state)==1&&*begin(state)==1))
     {
-        repe(f, getDivisors(GetFactors(i)))
-        {
-            if (f == i) continue;
-            if (dp[f] < dp[i]+1)
-            {
-                dp[f] = dp[i] + 1;
-                par[f] = i;
-            }
-        }
+        return 0;
     }
+
+    auto it = dp.find(comp_hash(state));
+    if (it != dp.end()) return it->second;
+
+    ll ret = inf;
+    ll v = *prev(end(state));
+
+    {
+        set<ll> c = state;
+        c.erase(v);
+        ll extra = c.count(v-1) ? 0 : w[v - 1];
+        c.insert(v - 1);
+        ret = min(ret, extra+best(c));
+    }
+
+    repe(d, divisors[v])
+    {
+        set<ll> c = state;
+        c.erase(v);
+        ll extra = c.count(d) ? 0 : w[d];
+        if (!c.count(v / d) && v/d!=d) extra += w[v / d];
+        c.insert(d);
+        c.insert(v/d);
+        ret = min(ret, extra + best(c));
+    }
+
+    return dp[comp_hash(state)]=ret;
+}
+
+
+int main()
+{
+    cin.tie(0)->sync_with_stdio(0);
     
-    int u = 1;
-    vi ans;
-    while (u!=-1)
+    dp.reserve(int(1e6));
+
+    ll n;
+    cin >> n;
+    w.resize(n);
+    repe(v, w) cin >> v;
+    w.insert(w.begin(), 0LL);
+    divisors.resize(n + 1);
+
+    repp(i, 1, n + 1)
     {
-        ans.push_back(u);
-        u = par[u];
+        vi divs;
+        ll j = 2;
+        ll v = i;
+        while (v>1&&j*j<=v)
+        {
+            if (v % j == 0) divs.push_back(j);
+            j++;
+        }
+        divisors[i] = divs;
     }
-    cout << sz(ans) << "\n";
-    rep(i, sz(ans)) cout << ans[i] << " ";
+
+    repp(i, 1, n+1)
+    {
+        set<ll> st = { i };
+        cout << best(st)+w[i] << "\n";
+    }
 
     return 0;
 }
