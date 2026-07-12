@@ -1,197 +1,81 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <algorithm>
-#include <cmath>
-#include <set>
-#include <unordered_set>
-#include <string>
-#include <iterator>
-#include <queue>
-#include <tuple>
-#include <numeric>
-#include <random>
-#include <time.h>
-#include <stack>
-#include <chrono>
-#include <unordered_map>
-#include <iomanip>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-#define ll long long
-#define vi vector<ll>
-#define vvi vector<vi>
-#define p2 pair<ll, ll>
-#define p3 vi
-#define p4 vi
-#define inf 2e9
-#define linf 1e17
+using ll = long long;
+using vi = vector<ll>;
+using vvi = vector<vi>;
 
-#define read(a) cin >> a
-#define write(a) cout << (a) << endl
-#define deb __debugbreak();
+#define rep(i, b) for (ll i = 0; i < (b); ++i)
+#define repp(i, a, b) for (ll i = (a); i < (b); ++i)
+#define all(x) begin(x), end(x)
+#define sz(x) ((ll)(x).size())
 
-#define readpush(type,a) type temp; read(temp); a.push_back(temp)
-#define readinsert(type,a) type temp; read(temp); a.insert(temp)
-#define setcontains(set, x) (set.find(x) != set.end())
-#define all(a) begin(a),end(a)
-
-#define rep(i, high) for (ll i = 0; i < high; i++)
-#define repe(i, container) for (auto& i : container)
-#define per(i, high) for (ll i = high; i >= 0; i--)
-
-#define ceildiv(x,y) ((x + y - 1) / y)
-
-
-inline void fast()
-{
-    ios::sync_with_stdio(false);
-    cin.tie(NULL); cout.tie(NULL);
-}
-
-vector<vector<int>*> xSort(300001, nullptr);
-vector<vector<int>*> ySort(300001, nullptr);
-vector<int> ans(300001, 0);
-vector<unordered_set<int>> neighbours(500001, unordered_set<int>());
-vector<int> groups(500001, -1);
-
-int dfs(vector<unordered_set<int>>& neighbours, vector<int>& seen, int c, int color)
-{
-    if (seen[c] != -1)
-    {
-        return 0;
+struct UF {
+    vi e;
+    UF(ll n) : e(n, -1) {}
+    bool sameSet(ll a, ll b) { return find(a) == find(b); }
+    ll size(ll x) { return -e[find(x)]; }
+    ll find(ll x) { return e[x] < 0 ? x : e[x] = find(e[x]); }
+    bool join(ll a, ll b) {
+        a = find(a), b = find(b);
+        if (a == b) return false;
+        if (e[a] > e[b]) swap(a, b);
+        e[a] += e[b]; e[b] = a;
+        return true;
     }
-    else
-    {
-        seen[c] = color;
-    }
+};
 
-    int ret = 1;
-    repe(neighbour, neighbours[c])
-    {
-        ret += dfs(neighbours, seen, neighbour, color);
-    }
-    return ret;
-}
+const ll maxcoord = ll(3e5) + 10;
 
-
-
-int main()
+signed main()
 {
-    fast();
+    cin.tie(0)->sync_with_stdio(0);
 
-    int n;
-    int m;
-    int k;
-    read(n);
-    read(m);
-    read(k);
+    ll n, m, k;
+    cin >> n >> m >> k;
+
+    vvi x(maxcoord);
+    vvi y(maxcoord);
 
     rep(i, m)
     {
-        int x;
-        int y;
-        cin >> x;
-        cin >> y;
-
-        if (xSort[x] != nullptr)
-        {
-            xSort[x]->push_back(i);
-        }
-        else
-        {
-            xSort[x] = new vector<int>({ int(i) });
-        }
-
-        if (ySort[y] != nullptr)
-        {
-            ySort[y]->push_back(i);
-        }
-        else
-        {
-            ySort[y] = new vector<int>({ int(i) });
-        }
+        ll a, b;
+        cin >> a >> b;
+        x[a].push_back(i);
+        y[b].push_back(i);
     }
 
-
-
-
-
-
-
-    int curr = -1;
-    repe(i, xSort)
+    UF uf(m);
+    auto join = [&](vvi& axis)
     {
-        if (i != nullptr)
+        rep(i, maxcoord)
         {
-            repe(a, *i)
+            repp(j, 1, sz(axis[i]))
             {
-                repe(b, *i)
-                {
-                    if (a==b)
-                    {
-                        continue;
-                    }
-                    neighbours[a].insert(b);
-                    neighbours[b].insert(a);
-                }
+                uf.join(axis[i][0], axis[i][j]);
             }
         }
-    }
+    };
+    join(x);
+    join(y);
 
-    repe(i, ySort)
+    vi compsizes;
+    vi vis(m);
+    rep(i, m)
     {
-        if (i != nullptr)
-        {
-            repe(a, *i)
-            {
-                repe(b, *i)
-                {
-                    if (a == b)
-                    {
-                        continue;
-                    }
-                    neighbours[a].insert(b);
-                    neighbours[b].insert(a);
-                }
-            }
-        }
+        ll u = uf.find(i);
+        if (vis[u]) continue;
+        vis[u] = 1;
+        compsizes.push_back(uf.size(u));
     }
-
-
-    rep(n, neighbours.size())
+    sort(all(compsizes));
+    reverse(all(compsizes));
+    ll ans = 0;
+    rep(i, min(k, sz(compsizes)))
     {
-        if (groups[n] != -1)
-        {
-            continue;
-        }
-        int size = dfs(neighbours, groups, n, n);
-        if (size != -1)
-        {
-            ans[size]++;
-        }
+        ans += compsizes[i];
     }
-
-
-
-    int s = 0;
-    per(i, 300000)
-    {
-        if (ans[i] != 0)
-        {
-            int l = min(ans[i],k);
-            s += (l)*i;
-            k-=l;
-            if (k == 0)
-            {
-                break;
-            }
-        }
-    }
-
-    write(s);
+    cout << ans;
 
     return 0;
 }
