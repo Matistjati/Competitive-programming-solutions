@@ -1,46 +1,24 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <algorithm>
-#include <cmath>
-#include <set>
-#include <string>
-#include <iterator>
-#include <queue>
-#include <tuple>
-#include <numeric>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-#define ll long long
-#define read(a) cin >> a
-#define write(a) cout << (a) << endl
-#define readpush(type,a) type temp; read(temp); a.push_back(temp)
-#define readinsert(type,a) type temp; read(temp); a.insert(temp)
-#define setcontains(set, x) (set.find(x) != set.end())
+using ll = long long;
+using vi = vector<ll>;
+using vvi = vector<vi>;
+using p2 = pair<ll, ll>;
+const ll inf = 1e18;
 
-#define rep(i, high) for (ll i = 0; i < high; i++)
-#define repe(i, container) for (auto& i : container)
-#define inf 1e9
+#define rep(i,n) for (ll i = 0; i < (n); i++)
+#define repp(i,a,n) for (ll i = (a); i < (n); i++)
+#define repe(i, arr) for (auto& i : arr)
+#define all(x) begin(x),end(x)
+#define sz(x) ((ll)(x).size())
 
-void fast()
-{
-    ios::sync_with_stdio(false);
-    cin.tie(NULL); cout.tie(NULL);
-}
-
-int main()
-{
-    fast();
+int main() {
+    cin.tie(0)->sync_with_stdio(0);
     vector<int> nums(3);
-    repe(num, nums)
-    {
-        read(num);
-    }
-    sort(nums.begin(), nums.end());
-    repe(num, nums)
-    {
+    rep(i,3) cin >> nums[i];
+    sort(all(nums));
+    repe(num, nums) {
         cout << num << " ";
     }
 }
