@@ -1,52 +1,19 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <algorithm>
-#include <cmath>
-#include <set>
-#include <unordered_set>
-#include <string>
-#include <iterator>
-#include <queue>
-#include <tuple>
-#include <numeric>
-#include <random>
-#include <time.h>
-
-
+#include <bits/stdc++.h>
 using namespace std;
 
-#define ll long long
-#define p2 pair<ll, ll>
-#define p3 tuple<ll, ll, ll>
-#define vi vector<ll>
-#define inf 1e9
+using ll = long long;
+using vi = vector<ll>;
+using vvi = vector<vi>;
+using p2 = pair<ll, ll>;
+const ll inf = 1e18;
 
-#define read(a) cin >> a
-#define write(a) cout << (a) << endl
+#define rep(i,n) for (ll i = 0; i < (n); i++)
+#define repp(i,a,n) for (ll i = (a); i < (n); i++)
+#define repe(i, arr) for (auto& i : arr)
+#define all(x) begin(x),end(x)
+#define sz(x) ((ll)(x).size())
 
-#define readpush(type,a) type temp; read(temp); a.push_back(temp)
-#define readinsert(type,a) type temp; read(temp); a.insert(temp)
-#define setcontains(set, x) (set.find(x) != set.end())
-#define all(a) begin(a),end(a)
-
-#define rep(i, high) for (ll i = 0; i < high; i++)
-#define repe(i, container) for (auto& i : container)
-#define per(i, high) for (ll i = high; i >= 0; i--)
-
-#define ceildiv(x,y) ((x + y - 1) / y)
-
-
-inline void fast()
-{
-    ios::sync_with_stdio(false);
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL); cout.tie(NULL);
-}
-
-int winning(string& board, char player)
-{
+ll winning(string& board, char player) {
     if (
         (board[0] == player && board[1] == player && board[2] == player) ||
         (board[3] == player && board[4] == player && board[5] == player) ||
@@ -70,10 +37,10 @@ void display(string board)
 {
     cout << board[0] << board[1] << board[2] << endl;
     cout << board[3] << board[4] << board[5] << endl;
-    cout << board[6] << board[7] << board[8] << endl;;// << endl;
+    cout << board[6] << board[7] << board[8] << endl;
 }
 
-p2 sequence(string board, bool computer, int depth)
+p2 sequence(string board, bool computer, ll depth)
 {
     p2 best = { -1, (computer) ? -inf : inf };
     if (winning(board, 'x'))
@@ -84,7 +51,7 @@ p2 sequence(string board, bool computer, int depth)
     {
         return best;
     }
-    int n = 0;
+    ll n = 0;
 
     rep(i, 9)
     {
@@ -99,7 +66,6 @@ p2 sequence(string board, bool computer, int depth)
     {
         return { -1,0 };
     }
-
 
     rep(i,9)
     {
@@ -138,17 +104,14 @@ p2 sequence(string board, bool computer, int depth)
         }
     }
 
-
-
     return best;
 }
 
-int main()
-{
-    fast();
+int main() {
+    cin.tie(0)->sync_with_stdio(0);
 
     string order;
-    read(order);
+    cin >> order;
 
     string board = ".........";
 
@@ -157,9 +120,9 @@ int main()
         string t1;
         string t2;
         string t3;
-        read(t1);
-        read(t2);
-        read(t3);
+        cin >> t1;
+        cin >> t2;
+        cin >> t3;
         board = t1 + t2 + t3;
     }
     else
@@ -168,15 +131,15 @@ int main()
         string t1;
         string t2;
         string t3;
-        read(t1);
-        read(t2);
-        read(t3);
+        cin >> t1;
+        cin >> t2;
+        cin >> t3;
         board = t1 + t2 + t3;
     }
 
     while (true)
     {
-        int best = -inf;
+        ll best = -inf;
 
         p2 move = sequence(board, true, 0);
 
@@ -186,7 +149,7 @@ int main()
         {
             break;
         }
-        int n = 0;
+        ll n = 0;
         rep(i, 9)
         {
             if (board[i] != '.')
@@ -199,12 +162,8 @@ int main()
             break;
         }
 
-        string t1;
-        string t2;
-        string t3;
-        read(t1);
-        read(t2);
-        read(t3);
+        string t1, t2, t3;
+        cin >> t1 >> t2 >> t3;
         board = t1 + t2 + t3;
         if (winning(board, 'x') || winning(board, 'o'))
         {

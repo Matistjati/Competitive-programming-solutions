@@ -1,116 +1,60 @@
 #include <bits/stdc++.h>
-
 using namespace std;
 
-#define ll long long
-#define vi vector<ll>
-#define vvi vector<vi>
-#define p2 pair<ll, ll>
-#define p3 vi
-#define p4 vi
-#define vp2 vector<p2>
-#define vp3 vector<p3>
-#define inf 2e9
-#define linf 1e17
+using ll = long long;
+using vi = vector<ll>;
+using vvi = vector<vi>;
+using p2 = pair<ll, ll>;
+const ll inf = 1e18;
 
-#define read(a) cin >> a
-#define dread(type, a) type a; cin >> a
-#define dread2(type, a, b) dread(type, a); dread(type, b)
-#define write(a) cout << (a) << endl
-#ifdef _DEBUG
-#define deb __debugbreak();
-#else
-#define deb ;
-#endif
+#define rep(i,n) for (ll i = 0; i < (n); i++)
+#define repp(i,a,n) for (ll i = (a); i < (n); i++)
+#define repe(i, arr) for (auto& i : arr)
+#define all(x) begin(x),end(x)
+#define sz(x) ((ll)(x).size())
 
-#define readpush(type,a) {type temp; read(temp); a.push_back(temp);}
-#define readinsert(type,a) {type temp; read(temp); a.insert(temp);}
-#define setcontains(set, x) (set.find(x) != set.end())
-#define stringcontains(str, x) (str.find(x) != string::npos)
-#define all(a) begin(a),end(a)
+#include <sys/stat.h>
+#include <unistd.h>
+int main() {
 
-#define rep(i, high) for (ll i = 0; i < high; i++)
-#define repe(i, container) for (auto& i : container)
-#define per(i, high) for (ll i = high; i >= 0; i--)
+    struct stat st;
+    fstat(0, &st);
+    string konami(st.st_size, '\0');
+    read(0, &konami[0], st.st_size);
 
-#define ceildiv(x,y) ((x + y - 1) / y)
-#define fract(a) (a-floor(a))
+    array<int,9> dp;
+    fill(all(dp),-1e9);
 
-
-inline void fast()
-{
-    ios::sync_with_stdio(false);
-    cin.tie(NULL); cout.tie(NULL);
-}
-
-int main()
-{
-    fast();
-
-#if 0
-    ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
-#endif
-
-    dread(string, konami);
-
-    int konamiLength = 10;
-    map<int, pair<int, int>> codes;
-
-    vector<tuple<int, int, int>> waitingU;
-    vector<tuple<int, int, int>> waitingN;
-    vector<tuple<int, int, int>> waitingV;
-    vector<tuple<int, int, int>> waitingH;
-    vector<tuple<int, int, int>> waitingB;
-    vector<tuple<int, int, int>> waitingA;
-
-    map<char, vector<tuple<int, int, int>>*> cToSet = { {'U',&waitingU},{'N',&waitingN},{'V',&waitingV},{'H',&waitingH},{'B',&waitingB},{'A',&waitingA} };
-
-    vector<char> konamiCode = { 'U','U','N','N','V','H','V','H','B','A' };
-
-    rep(i, konami.size())
-    {
+    int ans = 1e9;
+    #pragma GCC unroll 8
+    rep(i,sz(konami)) {
         char c = konami[i];
-
-
-        vector<tuple<int, int, int>> waiting = *cToSet[c];
-        (*cToSet[c]) = vector<tuple<int, int, int>>();
-        repe(wait, waiting)
-        {
-            int id, index, codeP;
-            tie(id, index, codeP) = wait;
-
-            if (codeP == 1)
-            {
-                codes[id] = {0 , 0 };
-            }
-            codes[id].first += (i - index-1);
-            codes[id].second++;
-
-            codeP++;
-            if (codeP == konamiCode.size())
-            {
-                continue;
-            }
-            char nextChar = konamiCode[codeP];
-            cToSet[nextChar]->push_back({id, i, codeP});
-        }
-
-        if (c == 'U')
-        {
-            waitingU.push_back({ i, i, 1 });
+        switch (c) {
+            case 'U':
+                dp[1] = dp[0];
+                dp[0] = i;
+                break;
+            case 'N':
+                dp[3]=dp[2];
+                dp[2]=dp[1];
+                break;
+            case 'V':
+                dp[4]=dp[3];
+                dp[6]=dp[5];
+                break;
+            case 'H':
+                dp[5]=dp[4];
+                dp[7]=dp[6];
+                break;
+            case 'B':
+                dp[8]=dp[7];
+                break;
+            case 'A':
+                ans = min<int>(ans, i-dp[8]);
+                break;
         }
     }
-
-    int best = inf;
-    repe(c, codes)
-    {
-        if (c.second.second == 9)
-        {
-            best = min(best, c.second.first);
-        }
-    }
-
-    write(best);
+    cout << ans-9 << '\n';
 
     return 0;
 }
