@@ -14,45 +14,6 @@ const ll inf = 1e18;
 #define sz(x) ((ll)(x).size())
 
 using p3 = tuple<ll,ll,ll>;
-using vp3 = vector<p3>;
-
-ll best(ll i, ll c, vp3& tstats, ll p, vvi& dp)
-{
-    if (c < 0)
-    {
-        return -inf;
-    }
-    if (i == tstats.size())
-    {
-        return 0;
-    }
-
-    ll k = (c != inf ? c : 501);
-    ll& v = dp[i][k];
-    if (v != -1) return v;
-    ll ret = 0;
-    ll cap, wei, prof;
-    tie(cap, wei, prof) = tstats[i];
-
-    ret = max(ret, prof + best(i + 1, min(c - wei, cap), tstats, p + prof, dp));
-    ret = max(ret, best(i + 1, c, tstats, p, dp));
-
-    return v = ret;
-}
-
-ll solveorder(vp3& turtles)
-{
-    ll n = turtles.size();
-    const ll f1 = 1;
-    const ll f2 = 0;
-    sort(all(turtles), [](p3& a, p3& b)
-        {
-            return (get<f1>(a) + get<f2>(a)) > (get<f1>(b) + get<f2>(b));
-        });
-
-    vvi dp(n, vi(502, -1));
-    return best(0, inf, turtles, 0, dp);
-}
 
 int main()
 {
@@ -60,17 +21,26 @@ int main()
 
     ll n;
     cin >> n;
-    vp3 turtles(n);
-    rep(i, n)
-    {
-        ll cap, wei, prof;
-        cin >> cap >> wei >> prof;
-        turtles[i] = { cap,wei,prof };
+    vector<p3> turtles(n);
+    for (auto& [a,b,c] : turtles) {
+        cin >> a >> b >> c;
+    }
+    sort(all(turtles), [](p3 a, p3 b) {
+        return get<1>(a) + get<0>(a) < get<1>(b) + get<0>(b);
+    });
+
+    const int LIMIT = 1005;
+    vector<int> dp(LIMIT),new_dp(LIMIT);
+    for (auto [cap, weight, len] : turtles) {
+        rep(c_w, LIMIT) {
+            if (c_w > cap || c_w + weight > LIMIT) break;
+            new_dp[c_w + weight] = max<int>(new_dp[c_w + weight], dp[c_w] + len);
+        }
+
+        dp = new_dp;
     }
 
-    ll best = 0;
-    best = max(best, solveorder(turtles));
-    cout << best;
+    cout << *max_element(all(dp)) << '\n';
 
     return 0;
 }
