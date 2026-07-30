@@ -1,0 +1,1 @@
+../po/pokval09/janersa.cpp

@@ -1,1 +1,0 @@
-../po/pokval99/kylskap.cpp

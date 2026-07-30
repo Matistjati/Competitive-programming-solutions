@@ -1,2 +1,4 @@
 .idea/
 .vscode/
+solve_stats/
+__pycache__/

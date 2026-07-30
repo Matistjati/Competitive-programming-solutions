@@ -1,1 +1,1 @@
-../po/district/tictactoe.cpp
+../po/district/interactivetictactoe.cpp

@@ -1,53 +1,28 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <algorithm>
-#include <cmath>
-#include <set>
-#include <unordered_set>
-#include <string>
-#include <iterator>
-#include <queue>
-#include <tuple>
-#include <numeric>
-#include <random>
-#include <time.h>
-
-
+#include <bits/stdc++.h>
 using namespace std;
 
-#define ll long long
-#define read(a) cin >> a
-#define write(a) cout << (a) << endl
-#define readpush(type,a) type temp; read(temp); a.push_back(temp)
-#define readinsert(type,a) type temp; read(temp); a.insert(temp)
-#define setcontains(set, x) (set.find(x) != set.end())
+using ll = long long;
+using vi = vector<ll>;
+using vvi = vector<vi>;
+using p2 = pair<ll, ll>;
+const ll inf = 1e18;
 
-#define rep(i, high) for (ll i = 0; i < high; i++)
-#define repe(i, container) for (auto& i : container)
-#define per(i, high) for (ll i = high; i >= 0; i--)
-#define inf 1e9
-#define ceildiv(x,y) ((x + y - 1) / y)
-
-inline void fast()
-{
-    ios::sync_with_stdio(false);
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL); cout.tie(NULL);
-}
+#define rep(i,n) for (ll i = 0; i < (n); i++)
+#define repp(i,a,n) for (ll i = (a); i < (n); i++)
+#define repe(i, arr) for (auto& i : arr)
+#define all(x) begin(x),end(x)
+#define sz(x) ((ll)(x).size())
 
 
 int main()
 {
-    fast();
+    cin.tie(0)->sync_with_stdio(0);
 
     int n;
-    read(n);
+    cin >> n;
     string colors;
-    read(colors);
+    cin >> colors;
     string ans = "";
-
 
     int index = 0;
     while (ans.size() < n)
@@ -102,8 +77,6 @@ int main()
                     }
                 }
                 b++;
-
-
             }
             if (chosen != 'S')
             {
@@ -114,7 +87,7 @@ int main()
         }
     }
 
-    write(ans);
+    cout << ans << '\n';
 
     return 0;
 }

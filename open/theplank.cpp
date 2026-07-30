@@ -1,1 +1,1 @@
-../po/powarmup22/theplank.cpp
+../po/pokval01/theplank.cpp

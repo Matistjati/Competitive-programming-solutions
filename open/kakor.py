@@ -1,1 +1,1 @@
-../po/pokatt16/practice/kakor.cpp
+../po/pokatt16/practice/kakor.py

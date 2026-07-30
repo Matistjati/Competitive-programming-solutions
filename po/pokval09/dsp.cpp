@@ -1,91 +1,55 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <algorithm>
-#include <cmath>
-#include <set>
-#include <unordered_set>
-#include <string>
-#include <iterator>
-#include <queue>
-#include <tuple>
-#include <numeric>
-#include <random>
-#include <time.h>
-
-
+#include <bits/stdc++.h>
 using namespace std;
 
-#define p2 pair<int, int>
-#define ll long long
-#define inf 1e9
+using ll = long long;
+using vi = vector<ll>;
+using vvi = vector<vi>;
+using p2 = pair<ll, ll>;
+const ll inf = 1e18;
 
-#define read(a) cin >> a
-#define write(a) cout << (a) << endl
+#define rep(i,n) for (ll i = 0; i < (n); i++)
+#define repp(i,a,n) for (ll i = (a); i < (n); i++)
+#define repe(i, arr) for (auto& i : arr)
+#define all(x) begin(x),end(x)
+#define sz(x) ((ll)(x).size())
 
-#define readpush(type,a) type temp; read(temp); a.push_back(temp)
-#define readinsert(type,a) type temp; read(temp); a.insert(temp)
-#define setcontains(set, x) (set.find(x) != set.end())
-
-#define rep(i, high) for (ll i = 0; i < high; i++)
-#define repe(i, container) for (auto& i : container)
-#define per(i, high) for (ll i = high; i >= 0; i--)
-
-#define ceildiv(x,y) ((x + y - 1) / y)
-
-
-inline void fast()
-{
-    ios::sync_with_stdio(false);
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL); cout.tie(NULL);
-}
-
-int main()
-{
-    fast();
+int main() {
+    cin.tie(0)->sync_with_stdio(0);
 
     vector<int> registers(256);
 
     int n;
-    read(n);
+    cin >> n;
     vector<pair<string, pair<int, int>>> commands;
-    rep(i, n)
-    {
+    rep(i, n) {
         string command;
-        read(command);
-        if (command == "INPUT" || command == "OUTPUT")
-        {
+        cin >> command;
+        if (command == "INPUT" || command == "OUTPUT") {
             int nRegister;
-            read(nRegister);
-            commands.push_back({ command,{nRegister,-inf} });
+            cin >> nRegister;
+            commands.push_back({ command,{nRegister,-1} });
         }
-        else if (command == "HALT")
-        {
-            commands.push_back({ command,{-inf,-inf} });
+        else if (command == "HALT") {
+            commands.push_back({ command,{-1,-1} });
         }
-        else
-        {
-            int a;
-            int b;
-            read(a);
-            read(b);
+        else {
+            int a, b;
+            cin >> a >> b;
             commands.push_back({ command,{a,b} });
         }
     }
 
-    rep(i, commands.size())
+    rep(i, sz(commands))
     {
         auto command = commands[i];
 
         if (command.first == "INPUT")
         {
-            read(registers[command.second.first]);
+            cin >> registers[command.second.first];
         }
         else if (command.first == "OUTPUT")
         {
-            write(registers[command.second.first]);
+            cout << registers[command.second.first] << '\n';
         }
         else if (command.first == "HALT")
         {

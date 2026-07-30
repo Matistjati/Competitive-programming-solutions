@@ -1,0 +1,1 @@
+../po/pokval26/lojtnantslotto.cpp

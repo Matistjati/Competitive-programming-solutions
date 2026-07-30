@@ -1,0 +1,1 @@
+../po/skolkval11/receptet.cpp

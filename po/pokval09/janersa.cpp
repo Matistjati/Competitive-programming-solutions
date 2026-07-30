@@ -1,50 +1,22 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <algorithm>
-#include <cmath>
-#include <set>
-#include <unordered_set>
-#include <string>
-#include <iterator>
-#include <queue>
-#include <tuple>
-#include <numeric>
-#include <random>
-#include <time.h>
-
-
+#include <bits/stdc++.h>
 using namespace std;
 
-#define p2 pair<int, int>
-#define ll long long
-#define inf 1e9
+using ll = long long;
+using vi = vector<ll>;
+using vvi = vector<vi>;
+using p2 = pair<ll, ll>;
+const ll inf = 1e18;
 
-#define read(a) cin >> a
-#define write(a) cout << (a) << endl
+#define rep(i,n) for (ll i = 0; i < (n); i++)
+#define repp(i,a,n) for (ll i = (a); i < (n); i++)
+#define repe(i, arr) for (auto& i : arr)
+#define all(x) begin(x),end(x)
+#define sz(x) ((ll)(x).size())
 
-#define readpush(type,a) type temp; read(temp); a.push_back(temp)
-#define readinsert(type,a) type temp; read(temp); a.insert(temp)
-#define setcontains(set, x) (set.find(x) != set.end())
-
-#define rep(i, high) for (ll i = 0; i < high; i++)
-#define repe(i, container) for (auto& i : container)
-#define per(i, high) for (ll i = high; i >= 0; i--)
-
-#define ceildiv(x,y) ((x + y - 1) / y)
-
-
-inline void fast()
-{
-    ios::sync_with_stdio(false);
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL); cout.tie(NULL);
-}
 
 p2 shortest(map<int, set<p2>>& edges, int start, int n)
 {
-    vector<int> d(n+1, inf);
+    vector<int> d(n+1, 1e9);
     d[start] = 0;
 
     priority_queue<p2> pq;
@@ -61,7 +33,7 @@ p2 shortest(map<int, set<p2>>& edges, int start, int n)
 
         repe(edge, edges[curr.second])
         {
-            if (!setcontains(visited, edge.second))
+            if (!visited.count(edge.second))
             {
                 int old_cost = d[edge.second];
                 int new_cost = edge.first + d[curr.second];
@@ -80,30 +52,22 @@ p2 shortest(map<int, set<p2>>& edges, int start, int n)
     return {it-d.begin(),*it};
 }
 
-int main()
-{
-    fast();
+int main() {
+    cin.tie()->sync_with_stdio(0);
 
-    int n;
-    int v;
-    read(n);
-    read(v);
+    int n,v;
+    cin >> n >> v;
 
     map<int, set<p2>> edges;
-    rep(i, v)
-    {
-        int houseA;
-        int houseB;
-        int length;
-        read(houseA);
-        read(houseB);
-        read(length);
+    rep(i, v) {
+        int houseA, houseB, length;
+        cin >> houseA >> houseB >> length;
 
-        if (!setcontains(edges, houseA))
+        if (!edges.count(houseA))
         {
             edges[houseA] = set<p2>();
         }
-        if (!setcontains(edges, houseB))
+        if (!edges.count(houseB))
         {
             edges[houseB] = set<p2>();
         }
@@ -125,8 +89,7 @@ int main()
             longest = dist.second;
         }
     }
-    cout << a << " " << b << " " << longest*100;
-
+    cout << a << ' ' << b << ' ' << longest*100 << endl;
 
     return 0;
 }

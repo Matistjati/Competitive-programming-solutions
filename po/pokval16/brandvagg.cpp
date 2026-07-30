@@ -1,67 +1,17 @@
 #include <bits/stdc++.h>
-
 using namespace std;
 
-#pragma GCC target ("avx2")
-#pragma GCC optimization ("O3")
-#pragma GCC optimization ("unroll-loops")
+using ll = long long;
+using vi = vector<ll>;
+using vvi = vector<vi>;
+using p2 = pair<ll, ll>;
+const ll inf = 1e18;
 
-#define ll long long
-#define vi vector<ll>
-#define vvi vector<vi>
-#define p2 pair<ll, ll>
-#define p3 vi
-#define p4 vi
-#define vp2 vector<p2>
-#define vp3 vector<p3>
-#define inf 2e9
-#define linf 1e17
-
-#define read(a) cin >> a
-#define dread(type, a) type a; cin >> a
-#define dread2(type, a, b) dread(type, a); dread(type, b)
-#define write(a) cout << (a) << endl
-#ifdef _DEBUG
-#define deb __debugbreak();
-#else
-#define deb ;
-#endif
-
-#define readpush(type,a) {type temp; read(temp); a.push_back(temp);}
-#define readinsert(type,a) {type temp; read(temp); a.insert(temp);}
-#define setcontains(set, x) (set.find(x) != set.end())
-#define stringcontains(str, x) (str.find(x) != string::npos)
-#define all(a) begin(a),end(a)
-
-#define rep(i, high) for (ll i = 0; i < high; i++)
-#define repe(i, container) for (auto& i : container)
-#define per(i, high) for (ll i = high; i >= 0; i--)
-
-#define ceildiv(x,y) ((x + y - 1) / y)
-#define fract(a) (a-floor(a))
-
-
-inline void fast()
-{
-    ios::sync_with_stdio(false);
-    cin.tie(NULL); cout.tie(NULL);
-}
-
-
-template <typename Out>
-void split(const std::string& s, char delim, Out result) {
-    std::istringstream iss(s);
-    std::string item;
-    while (std::getline(iss, item, delim)) {
-        *result++ = item;
-    }
-}
-
-std::vector<std::string> split(const std::string& s, char delim) {
-    std::vector<std::string> elems;
-    split(s, delim, std::back_inserter(elems));
-    return elems;
-}
+#define rep(i,n) for (ll i = 0; i < (n); i++)
+#define repp(i,a,n) for (ll i = (a); i < (n); i++)
+#define repe(i, arr) for (auto& i : arr)
+#define all(x) begin(x),end(x)
+#define sz(x) ((ll)(x).size())
 
 enum ruletype
 {
@@ -76,25 +26,27 @@ enum ruletype
 struct Rule
 {
     ruletype type;
-    int limit;
+    ll limit;
     string ip;
     string port;
 };
 
+vector<string> split(string& s, char delim) {
+    vector<string> ret;
+    istringstream iss(s);
+    string item;
+    while (getline(iss, item, delim)) {
+        ret.push_back(item);
+    }
+    return ret;
+}
 
 int main()
 {
-    fast();
+    cin.tie(0)->sync_with_stdio(0);
 
-#if 0
-    //ifstream cin("C:\\Users\\Matis\\source\\repos\\Comp prog\\x64\\Debug\\in.txt");
-    ifstream cin("C:\\Users\\Matis\\Downloads\\pixel\\examples\\sample01.in");
-#endif
-
-
-
-    int n;
-    read(n);
+    ll n;
+    cin >> n;
 
     map<string, ruletype> stringToRule = { {"accept",ruletype::accept},{"drop",ruletype::drop},{"log",ruletype::Log},{"port",ruletype::port},{"ip",ruletype::ip},{"limit",ruletype::limit} };
     vector<pair<ruletype, vector<Rule>>> rules(n);
@@ -113,7 +65,7 @@ int main()
         pair<ruletype, vector<Rule>> ruleP;
         ruleP.first = stringToRule[ruleV[0]];
 
-        for (int i = 1; i < ruleV.size(); i++)
+        for (ll i = 1; i < ruleV.size(); i++)
         {
             vector<string> r = split(ruleV[i], '=');
             Rule ruleO;
@@ -135,23 +87,20 @@ int main()
             }
             else
             {
-                //deb
+                assert(0);
             }
 
         }
         rules.push_back(ruleP);
     }
 
-    int p;
-    read(p);
+    ll p;
+    cin >> p;
 
-    vector<string> requests;
-    rep(i, p)
-    {
-        readpush(string, requests);
-    }
+    vector<string> requests(p);
+    rep(i, p) cin >> requests[i];
 
-    map<ll, int> n_requests = {};
+    map<ll, ll> n_requests = {};
     queue<ll> requestLimit;
 
     rep(i, requests.size())
@@ -162,7 +111,7 @@ int main()
         string requestPort = requestParts[1];
 
         ll ipHash = 0;
-        for (int i = 0; i < requestIp.size();i++)
+        for (ll i = 0; i < requestIp.size();i++)
         {
             char c = requestIp[i];
             if (c >= '0' && c <= '9')
@@ -182,7 +131,6 @@ int main()
         {
 
             bool passing = true;
-
 
             repe(rule, ruleset.second)
             {
@@ -212,7 +160,7 @@ int main()
                 }
                 else
                 {
-                    //deb
+                    assert(0);
                 }
             }
 
@@ -235,12 +183,10 @@ int main()
                 }
             }
 
-
         }
 
     endRequest:;
     }
-
 
     return 0;
 }

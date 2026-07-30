@@ -1,6 +1,5 @@
 # Solutions various competitive programming problems
-I don't always upload the fastest solution for Kattis problems, mostly because they typically become very ugly when micro-optimizing them.
-(For example, adding fast input via [blazingio](https://github.com/purplesyringa/blazingio/blob/master/blazingio.min.hpp) and manual loop unrolling
-to get GCC to actually autovectorize make the code very ugly).
+I rarely upload the fastest solution I've obtained for Kattis problems, mostly because they typically become exceedingly ugly when micro-optimizing them.
+I do not mind discussing *how* I make my solutions fast; feel free to add me on discord @matistjati if you have any questions!
 
-Before late 2024, I had an unreasonably long template. I might clean up some of those solutions at some point.
+Before late 2024, I had an unreasonably long template. I am slowly working on cleaning them up.

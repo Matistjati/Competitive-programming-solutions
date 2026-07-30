@@ -13,24 +13,20 @@ const ll inf = 1e18;
 #define all(x) begin(x),end(x)
 #define sz(x) ((ll)(x).size())
 
-int main()
-{
-	int n;
-	cin >> n;
-	vector<int> h(n), b(n), k(n);
+int main() {
+    cin.tie(0)->sync_with_stdio(0);
 
-	rep(i, n) {
-		cin >> h[i] >> b[i] >> k[i];
-	}
+    int n;
+    cin >> n;
+    int x = 1;
+    vi ans;
+    while (x <= n) {
+        ans.push_back(x);
+        x *= 2;
+    }
+    cout << sz(ans) << '\n';
+    repe(u, ans) cout << u << ' ';
+    cout << '\n';
 
-	int price = 0;
-	rep(i, n)
-	{
-		if (h[i] < b[i])
-		{
-			price += (b[i] - h[i]) * k[i];
-		}
-	}
-	cout << price << '\n';
-	return 0;
+    return 0;
 }

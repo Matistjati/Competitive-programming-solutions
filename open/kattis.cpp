@@ -1,0 +1,1 @@
+../po/pokatt16/dag2/kattis.cpp

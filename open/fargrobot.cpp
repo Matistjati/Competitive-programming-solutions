@@ -1,0 +1,1 @@
+../po/pokval16/fargrobot.cpp
