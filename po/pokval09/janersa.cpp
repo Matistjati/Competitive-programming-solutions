@@ -14,82 +14,62 @@ const ll inf = 1e18;
 #define sz(x) ((ll)(x).size())
 
 
-p2 shortest(map<int, set<p2>>& edges, int start, int n)
-{
-    vector<int> d(n+1, 1e9);
-    d[start] = 0;
+p2 shortest(vector<vector<p2>>& adj, int start) {
+    vector<int> dist(sz(adj), 1e9);
+    dist[start] = 0;
 
     priority_queue<p2> pq;
     pq.push({ 0,start });
 
-    set<int> visited;
-
-    while (pq.size())
-    {
-        p2 curr = pq.top();
+    while (sz(pq)) {
+        auto [d,u] = pq.top();
         pq.pop();
 
-        visited.insert(curr.second);
+        d=-d;
+        if (d>dist[u]) continue;
 
-        repe(edge, edges[curr.second])
-        {
-            if (!visited.count(edge.second))
-            {
-                int old_cost = d[edge.second];
-                int new_cost = edge.first + d[curr.second];
-                if (new_cost < old_cost)
-                {
-                    pq.push({ -new_cost ,edge.second });
-                    d[edge.second] = new_cost;
-                }
+        for (auto [e, w] : adj[u]) {
+            if (w+d < dist[e]) {
+                dist[e] = w+d;
+                pq.push({-(w+d), e});
             }
         }
-
     }
 
-    d[0] = -1;
-    auto it = max_element(d.begin(), d.end());
-    return {it-d.begin(),*it};
+    auto it = max_element(all(dist));
+    return {it-begin(dist), *it};
 }
 
 int main() {
     cin.tie()->sync_with_stdio(0);
 
-    int n,v;
-    cin >> n >> v;
+    int n,m;
+    cin >> n >> m;
 
-    map<int, set<p2>> edges;
-    rep(i, v) {
-        int houseA, houseB, length;
-        cin >> houseA >> houseB >> length;
+    vector<vector<p2>> adj(n);
+    rep(i, m) {
+        int a, b, w;
+        cin >> a >> b >> w;
+        a--;
+        b--;
 
-        if (!edges.count(houseA))
-        {
-            edges[houseA] = set<p2>();
-        }
-        if (!edges.count(houseB))
-        {
-            edges[houseB] = set<p2>();
-        }
-        edges[houseA].insert({ length, houseB });
-        edges[houseB].insert({ length, houseA });
+        adj[a].emplace_back(b,w);
+        adj[b].emplace_back(a,w);
     }
 
     int longest = -1;
     int a = -1;
     int b = -1;
 
-    for (int i = 1; i < n + 1; i++)
-    {
-        p2 dist = shortest(edges, i, n);
-        if (dist.second > longest)
-        {
+    rep(i, n) {
+        p2 dist = shortest(adj, i);
+        if (dist.second > longest) {
             a = i;
             b = dist.first;
             longest = dist.second;
         }
     }
-    cout << a << ' ' << b << ' ' << longest*100 << endl;
+    cout << a+1 << ' ' << b+1 << ' ' << longest*100 << endl;
 
     return 0;
 }
