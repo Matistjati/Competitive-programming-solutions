@@ -1,35 +1,24 @@
 #include <bits/stdc++.h>
 using namespace std;
 
-typedef long long ll;
-#define int ll
-const int inf = int(1e18);
+using ll = long long;
+using vi = vector<ll>;
+using vvi = vector<vi>;
+using p2 = pair<ll, ll>;
+const ll inf = 1e18;
 
-typedef vector<int> vi;
-typedef vector<vi> vvi;
-typedef pair<int, int> p2;
-
-#define rep(i, high) for (int i = 0; i < (high); i++)
-#define repp(i, low, high) for (int i = (low); i < (high); i++)
-#define repe(i, container) for (auto& i : container)
-#define sz(container) ((int)container.size())
+#define rep(i,n) for (ll i = 0; i < (n); i++)
+#define repp(i,a,n) for (ll i = (a); i < (n); i++)
+#define repe(i, arr) for (auto& i : arr)
 #define all(x) begin(x),end(x)
+#define sz(x) ((ll)(x).size())
 
-inline void fast() { ios::sync_with_stdio(0); cin.tie(0); }
-
-#if _LOCAL
-#define assert(x) if (!(x)) __debugbreak()
-#endif
-
-signed main()
-{
-	fast();
+int main() {
+	cin.tie(0)->sync_with_stdio(0);
 
 	int n;
 	bool first = 1;
-	while (cin >> n && n)
-	{
-		if (!first) cout << "\n";
+	while (cin >> n && n) {
 		first = 0;
 		vector<pair<int,double>> vehicles(n);
 		rep(i, n) cin >> vehicles[i].second, vehicles[i].first=i;
@@ -42,7 +31,6 @@ signed main()
 		vi sol;
 		double best = -1;
 
-		// this really should not work....
 		rep(i, 1000)
 		{
 			vi taken;
@@ -67,7 +55,7 @@ signed main()
 			cout << sol[i] + 1;
 			if (i + 1 != sz(sol)) cout << " ";
 		}
-		
+		cout << '\n';
 	}
 
 	return 0;
