@@ -1,149 +1,63 @@
-#include <iostream>
-#include <vector>
-#include <map>
-#include <sstream>
-#include <algorithm>
-#include <cmath>
-#include <set>
-#include <unordered_set>
-#include <string>
-#include <iterator>
-#include <queue>
-#include <tuple>
-#include <numeric>
-#include <random>
-#include <time.h>
-#include <stack>
-#include <chrono>
-#include <unordered_map>
-#include <iomanip>
-
+#include <bits/stdc++.h>
 using namespace std;
 
-#define ll long long
-#define vi vector<ll>
-#define vvi vector<vi>
-#define p2 pair<ll, ll>
-#define p3 vi
-#define p4 vi
-#define inf 2e9
-#define linf 1e17
+using ll = long long;
+using vi = vector<ll>;
+using vvi = vector<vi>;
+using p2 = pair<ll, ll>;
+const ll inf = 1e18;
 
-#define read(a) cin >> a
-#define write(a) cout << (a) << endl
-#ifdef _DEBUG
-#define deb __debugbreak();
-#else
-#define deb ;
-#endif
+#define rep(i,n) for (ll i = 0; i < (n); i++)
+#define repp(i,a,n) for (ll i = (a); i < (n); i++)
+#define repe(i, arr) for (auto& i : arr)
+#define all(x) begin(x),end(x)
+#define sz(x) ((ll)(x).size())
 
-#define readpush(type,a) {type temp; read(temp); a.push_back(temp);}
-#define readinsert(type,a) {type temp; read(temp); a.insert(temp);}
-#define setcontains(set, x) (set.find(x) != set.end())
-#define stringcontains(str, x) (str.find(x) != string::npos)
-#define all(a) begin(a),end(a)
+char dp[21][21][51][51], nextdp[21][21][51][51];
 
-#define rep(i, high) for (ll i = 0; i < high; i++)
-#define repe(i, container) for (auto& i : container)
-#define per(i, high) for (ll i = high; i >= 0; i--)
+int main() {
+    cin.tie(0)->sync_with_stdio(0);
 
-#define ceildiv(x,y) ((x + y - 1) / y)
-#define fract(a) (a-floor(a))
+    memset(dp, 0xff, 21*21*51*51);
+    memset(nextdp, 0xff, 21*21*51*51);
 
-inline void fast()
-{
-    ios::sync_with_stdio(false);
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL); cout.tie(NULL);
-}
+    int n,a,b,c;
+    cin >> n >> a >> b >> c;
 
-int main()
-{
-    fast();
+    const int smallinf = 1e9;
 
-    int n;
-    read(n);
-    double small;
-    double medium;
-    double large;
-    read(small);
-    read(medium);
-    read(large);
+    dp[0][0][c][b]=0;
+    int ans = smallinf;
+    rep(i,smallinf) {
+        if (i>=ans) break;
 
-    vector<int> workers(n, 0);
-    int day = 0;
-    while (small > 0 || medium > 0 || large > 0)
-    {
-        int available = 0;
-        repe(worker, workers)
-        {
-            if (worker <= day)
-            {
-                available++;
-            }
+        // are we done?
+        rep(budget_loss, n+1) rep(budget_loss_tomorrow,n+1) {
+            if (dp[budget_loss][budget_loss_tomorrow][0][0] >= a) ans=min<int>(ans,i+2);
+            if (dp[budget_loss][0][0][0] >= a) ans=min<int>(ans,i+1);
+            if (dp[0][0][0][0] >= a) ans=min<int>(ans,i);
         }
 
-        while (available > 2 && large > 0)
-        {
-            int i = 0;
-            repe(worker, workers)
-            {
-                if (worker <= day)
-                {
-                    available--;
-                    worker = day + 3;
-                    i++;
-                    if (i == 3)
-                    {
-                        large--;
-                        break;
-                    }
+        // transitions
+        rep(left_b, b+1) rep(left_c, c+1) rep(budget_loss, n+1) rep(budget_loss_tomorrow,n+1) {
+            char got_small = dp[budget_loss][budget_loss_tomorrow][left_c][left_b];
+            if (got_small<0) continue;
+
+            int budget = n-budget_loss;
+            int budget_tomorrow = n-budget_loss_tomorrow;
+            rep(g3, left_c+1) {
+                if (g3 * 3 > min<int>(budget, budget_tomorrow)) break;
+                rep(g2, left_b+1) {
+                    if (g3 * 3 + g2 * 2 > min<int>(budget,budget_tomorrow)) break;
+                    char spare = budget - g3*3 - g2*2;
+                    char& v = nextdp[g3*3+g2*2+budget_loss_tomorrow][g3*3][left_c-g3][left_b-g2];
+                    v = max<char>(v, got_small + spare);
                 }
             }
         }
-
-        while (available > 1 && medium > 0)
-        {
-            int i = 0;
-            repe(worker, workers)
-            {
-                if (worker <= day)
-                {
-                    available--;
-                    worker = day + 2;
-                    i++;
-                    if (i == 2)
-                    {
-                        medium--;
-                        break;
-                    }
-                }
-            }
-        }
-
-        while (available > 0 && small > 0)
-        {
-            int i = 0;
-            repe(worker, workers)
-            {
-                if (worker <= day)
-                {
-                    available--;
-                    worker = day + 1;
-                    i++;
-                    if (i == 1)
-                    {
-                        small--;
-                        break;
-                    }
-                }
-            }
-        }
-
-        day++;
+        swap(dp,nextdp);
     }
-
-    write(*max_element(all(workers)));
+    cout << ans << '\n';
 
     return 0;
 }
